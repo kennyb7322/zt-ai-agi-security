@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Trust AI/GI/AGI Architecture — Animated Flow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #050910;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: 'Outfit', sans-serif;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 10%, #3b82f604 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 90%, #8b5cf604 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, #d4a01703 0%, transparent 40%),
+    linear-gradient(90deg, #0d152208 1px, transparent 1px),
+    linear-gradient(#0d152208 1px, transparent 1px);
+  background-size: 100%, 100%, 100%, 40px 40px, 40px 40px;
+  animation: gridDrift 25s linear infinite;
+}
+
+@keyframes gridDrift {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(40px,40px); }
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 1300px;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.title-bar {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.title-bar h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.1rem, 2.8vw, 1.8rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #e8edf5 0%, #3b82f6 25%, #06b6d4 45%, #8b5cf6 65%, #d4a017 85%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.title-bar .sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(0.5rem, 0.9vw, 0.65rem);
+  color: #556a8e;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.diagram-container {
+  background: #080e1a;
+  border: 1px solid #141f38;
+  border-radius: 16px;
+  padding: 16px 10px 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 80px #3b82f608, 0 0 160px #8b5cf604;
+}
+
+.diagram-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3b82f6, #06b6d4, #8b5cf6, #d4a017, #10b981, transparent);
+}
+
+svg { width: 100%; height: auto; display: block; }
+
+.author-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #080e1a;
+  border: 1px solid #141f38;
+  border-radius: 10px;
+}
+
+.author-strip .name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #e8edf5;
+}
+
+.author-strip .role {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  color: #556a8e;
+  letter-spacing: 0.04em;
+}
+
+.author-strip .tags {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.48rem;
+  color: #3b82f6;
+  text-align: right;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .author-strip { flex-direction: column; text-align: center; gap: 6px; }
+  .author-strip .tags { text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="title-bar">
+    <h1>🔐 Zero Trust Architecture for AI / GI / AGI</h1>
+    <div class="sub">Cloud-Agnostic · Defense-in-Depth · Autonomous-Ready · 10-Layer Security</div>
+  </div>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 1260 920" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- ARROW MARKERS -->
+        <marker id="ab" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#3b82f6" opacity="0.8"/></marker>
+        <marker id="ao" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#f59e0b" opacity="0.8"/></marker>
+        <marker id="ac" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#06b6d4" opacity="0.8"/></marker>
+        <marker id="ag" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#10b981" opacity="0.8"/></marker>
+        <marker id="ap" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#8b5cf6" opacity="0.8"/></marker>
+        <marker id="ar" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#ef4444" opacity="0.8"/></marker>
+        <marker id="at" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#14b8a6" opacity="0.8"/></marker>
+        <marker id="ago" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#d4a017" opacity="0.8"/></marker>
+        <marker id="ai" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#6366f1" opacity="0.8"/></marker>
+        <marker id="apk" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,6 2.5,0 5" fill="#ec4899" opacity="0.8"/></marker>
+
+        <!-- GLOW FILTERS -->
+        <filter id="glB"><feGaussianBlur stdDeviation="3"/></filter>
+        <filter id="glG"><feGaussianBlur stdDeviation="3"/></filter>
+        <filter id="glGo"><feGaussianBlur stdDeviation="4"/></filter>
+        <filter id="glI"><feGaussianBlur stdDeviation="4"/></filter>
+
+        <!-- PARTICLE GRADIENTS -->
+        <radialGradient id="pB"><stop offset="0%" stop-color="#3b82f6" stop-opacity="1"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></radialGradient>
+        <radialGradient id="pO"><stop offset="0%" stop-color="#f59e0b" stop-opacity="1"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+        <radialGradient id="pC"><stop offset="0%" stop-color="#06b6d4" stop-opacity="1"/><stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/></radialGradient>
+        <radialGradient id="pG"><stop offset="0%" stop-color="#10b981" stop-opacity="1"/><stop offset="100%" stop-color="#10b981" stop-opacity="0"/></radialGradient>
+        <radialGradient id="pP"><stop offset="0%" stop-color="#8b5cf6" stop-opacity="1"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/></radialGradient>
+        <radialGradient id="pR"><stop offset="0%" stop-color="#ef4444" stop-opacity="1"/><stop offset="100%" stop-color="#ef4444" stop-opacity="0"/></radialGradient>
+        <radialGradient id="pGo"><stop offset="0%" stop-color="#d4a017" stop-opacity="1"/><stop offset="100%" stop-color="#d4a017" stop-opacity="0"/></radialGradient>
+        <radialGradient id="pI"><stop offset="0%" stop-color="#6366f1" stop-opacity="1"/><stop offset="100%" stop-color="#6366f1" stop-opacity="0"/></radialGradient>
+
+        <!-- ANIMATED PATH DEFINITIONS FOR PARTICLES -->
+        <path id="mainDown" d="M 260 70 L 260 145 L 260 220 L 260 295 L 260 370 L 260 445 L 260 520 L 260 595 L 260 670 L 260 745" fill="none"/>
+        <path id="crossRight1" d="M 260 70 C 500 70, 600 145, 800 145" fill="none"/>
+        <path id="crossRight2" d="M 400 220 C 600 220, 700 295, 900 295" fill="none"/>
+        <path id="crossDiag1" d="M 260 370 C 400 370, 500 520, 700 520" fill="none"/>
+        <path id="crossDiag2" d="M 500 145 C 700 200, 600 370, 800 445" fill="none"/>
+        <path id="feedbackUp1" d="M 1050 745 C 1100 600, 1120 400, 1100 145" fill="none"/>
+        <path id="feedbackUp2" d="M 900 670 C 950 500, 980 300, 950 70" fill="none"/>
+        <path id="secretsSpan" d="M 150 520 L 1100 520" fill="none"/>
+        <path id="obsSpan" d="M 150 595 L 1100 595" fill="none"/>
+        <path id="ethicsSpan" d="M 150 745 L 1100 745" fill="none"/>
+      </defs>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- LAYER BACKGROUNDS                      -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="12" y="15" width="1236" height="68" rx="6" fill="#3b82f605" stroke="#3b82f615" stroke-width="1"/>
+      <rect x="12" y="90" width="1236" height="68" rx="6" fill="#f59e0b05" stroke="#f59e0b15" stroke-width="1"/>
+      <rect x="12" y="165" width="1236" height="68" rx="6" fill="#06b6d405" stroke="#06b6d415" stroke-width="1"/>
+      <rect x="12" y="240" width="1236" height="68" rx="6" fill="#10b98105" stroke="#10b98115" stroke-width="1"/>
+      <rect x="12" y="315" width="1236" height="68" rx="6" fill="#8b5cf605" stroke="#8b5cf615" stroke-width="1"/>
+      <rect x="12" y="390" width="1236" height="68" rx="6" fill="#ef444405" stroke="#ef444415" stroke-width="1"/>
+      <rect x="12" y="465" width="1236" height="68" rx="6" fill="#14b8a605" stroke="#14b8a615" stroke-width="1"/>
+      <rect x="12" y="540" width="1236" height="68" rx="6" fill="#10b98105" stroke="#10b98115" stroke-width="1"/>
+      <rect x="12" y="615" width="1236" height="68" rx="6" fill="#d4a01705" stroke="#d4a01715" stroke-width="1"/>
+      <rect x="12" y="690" width="1236" height="68" rx="6" fill="#6366f105" stroke="#6366f115" stroke-width="1"/>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- LAYER LABELS                           -->
+      <!-- ═══════════════════════════════════════ -->
+      <text x="22" y="36" fill="#3b82f6" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">01 AI-AWARE EDGE SECURITY</text>
+      <text x="22" y="111" fill="#f59e0b" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">02 AI SECURITY GATEWAY</text>
+      <text x="22" y="186" fill="#06b6d4" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">03 ZERO TRUST NETWORK</text>
+      <text x="22" y="261" fill="#10b981" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">04 AI CONTROL PLANE</text>
+      <text x="22" y="336" fill="#8b5cf6" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">05 GUARDRAILS & DLP</text>
+      <text x="22" y="411" fill="#ef4444" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">06 SECURE DATA LAYER</text>
+      <text x="22" y="486" fill="#14b8a6" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">07 SECRETS & IDENTITY</text>
+      <text x="22" y="561" fill="#10b981" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">08 OBSERVABILITY & SIEM</text>
+      <text x="22" y="636" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">09 AGI AUTONOMY GOVERNANCE</text>
+      <text x="22" y="711" fill="#6366f1" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" opacity="0.9">10 ETHICAL CONTAINMENT</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 01                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="30" width="115" height="38" rx="5" fill="#0b1120" stroke="#3b82f6" stroke-width="1.2"/>
+      <text x="253" y="47" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">CDN + WAF</text>
+      <text x="253" y="59" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">TLS 1.3 · OWASP</text>
+
+      <rect x="325" y="30" width="115" height="38" rx="5" fill="#0b1120" stroke="#3b82f6" stroke-width="1.2"/>
+      <text x="383" y="47" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">DDoS Shield</text>
+      <text x="383" y="59" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">L3/L4/L7</text>
+
+      <rect x="455" y="30" width="115" height="38" rx="5" fill="#0b1120" stroke="#3b82f6" stroke-width="1.2"/>
+      <text x="513" y="47" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">Bot Mitigation</text>
+      <text x="513" y="59" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Geo · CAPTCHA</text>
+
+      <rect x="585" y="30" width="125" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="648" y="47" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">API Rate Limit</text>
+      <text x="648" y="59" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Token Bucket</text>
+
+      <rect x="725" y="30" width="140" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="795" y="47" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Intent Classifier</text>
+      <text x="795" y="59" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Autonomy Detection</text>
+
+      <rect x="880" y="30" width="140" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="950" y="47" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Agentic Firewall</text>
+      <text x="950" y="59" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Multi-Agent Boundary</text>
+
+      <rect x="1035" y="30" width="130" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="1100" y="47" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Threat Intel Feed</text>
+      <text x="1100" y="59" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">AI-Specific TTPs</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 02                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="105" width="135" height="38" rx="5" fill="#0b1120" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="263" y="122" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">Prompt Injection Det.</text>
+      <text x="263" y="134" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Pattern + ML</text>
+
+      <rect x="345" y="105" width="125" height="38" rx="5" fill="#0b1120" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="408" y="122" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">Input Validation</text>
+      <text x="408" y="134" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Schema · Payload</text>
+
+      <rect x="485" y="105" width="135" height="38" rx="5" fill="#0b1120" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="553" y="122" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">Jailbreak Prevention</text>
+      <text x="553" y="134" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Payload Filter</text>
+
+      <rect x="635" y="105" width="120" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="695" y="122" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Cost Governor</text>
+      <text x="695" y="134" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Token Budget</text>
+
+      <rect x="770" y="105" width="130" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="835" y="122" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Supply Chain SBOM</text>
+      <text x="835" y="134" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Model Provenance</text>
+
+      <rect x="915" y="105" width="140" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="985" y="122" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Reasoning Validator</text>
+      <text x="985" y="134" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">CoT Audit</text>
+
+      <rect x="1070" y="105" width="140" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="1140" y="122" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Goal Alignment</text>
+      <text x="1140" y="134" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Objective Verify</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 03                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="180" width="125" height="38" rx="5" fill="#0b1120" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="258" y="197" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">Load Balancer</text>
+      <text x="258" y="209" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">HTTPS · mTLS</text>
+
+      <rect x="335" y="180" width="130" height="38" rx="5" fill="#0b1120" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="400" y="197" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">Private Subnets</text>
+      <text x="400" y="209" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">East-West Ctrl</text>
+
+      <rect x="480" y="180" width="135" height="38" rx="5" fill="#0b1120" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="548" y="197" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">PrivateLink / VPC</text>
+      <text x="548" y="209" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">No Internet</text>
+
+      <rect x="630" y="180" width="120" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="690" y="197" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Service Mesh</text>
+      <text x="690" y="209" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Istio · mTLS</text>
+
+      <rect x="765" y="180" width="150" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="840" y="197" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Agent Isolation</text>
+      <text x="840" y="209" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Inter-Agent mTLS</text>
+
+      <rect x="930" y="180" width="150" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="1005" y="197" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Cognitive Sandbox</text>
+      <text x="1005" y="209" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Reasoning Isolation</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 04                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="255" width="135" height="38" rx="5" fill="#0b1120" stroke="#10b981" stroke-width="1.2"/>
+      <text x="263" y="272" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">AI Control Plane</text>
+      <text x="263" y="284" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Policy · Auth · Route</text>
+
+      <rect x="345" y="255" width="125" height="38" rx="5" fill="#0b1120" stroke="#10b981" stroke-width="1.2"/>
+      <text x="408" y="272" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">App (Multi-AZ)</text>
+      <text x="408" y="284" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">IAM · No Creds</text>
+
+      <rect x="485" y="255" width="140" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="555" y="272" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Canary / Blue-Grn</text>
+      <text x="555" y="284" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Safe Model Deploy</text>
+
+      <rect x="640" y="255" width="150" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="715" y="272" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Autonomy Throttle</text>
+      <text x="715" y="284" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Action-Scope Limit</text>
+
+      <rect x="805" y="255" width="155" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="883" y="272" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Human-in-Loop Gate</text>
+      <text x="883" y="284" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Approval Workflows</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 05                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="330" width="130" height="38" rx="5" fill="#0b1120" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="260" y="347" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">PII/PHI Masking</text>
+      <text x="260" y="359" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">DLP · NER</text>
+
+      <rect x="340" y="330" width="125" height="38" rx="5" fill="#0b1120" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="403" y="347" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">Toxicity Check</text>
+      <text x="403" y="359" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Output Safety</text>
+
+      <rect x="480" y="330" width="135" height="38" rx="5" fill="#0b1120" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="548" y="347" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7.5" text-anchor="middle" font-weight="600">Response Filtering</text>
+      <text x="548" y="359" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Content Gate</text>
+
+      <rect x="630" y="330" width="130" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="695" y="347" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Immutable Audit</text>
+      <text x="695" y="359" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">AI Logs</text>
+
+      <rect x="775" y="330" width="155" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="853" y="347" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Emergent Behavior Det.</text>
+      <text x="853" y="359" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Anomaly + Drift</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 06                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="405" width="115" height="38" rx="5" fill="#0b1120" stroke="#ef4444" stroke-width="1.2"/>
+      <text x="253" y="422" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">RDS Multi-AZ</text>
+      <text x="253" y="434" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">KMS Encrypted</text>
+
+      <rect x="325" y="405" width="115" height="38" rx="5" fill="#0b1120" stroke="#ef4444" stroke-width="1.2"/>
+      <text x="383" y="422" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Vector DB RAG</text>
+      <text x="383" y="434" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Private VPC</text>
+
+      <rect x="455" y="405" width="115" height="38" rx="5" fill="#0b1120" stroke="#ef4444" stroke-width="1.2"/>
+      <text x="513" y="422" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Model Registry</text>
+      <text x="513" y="434" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">VPC EP Only</text>
+
+      <rect x="585" y="405" width="105" height="38" rx="5" fill="#0b1120" stroke="#ef4444" stroke-width="1.2"/>
+      <text x="638" y="422" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Redis Cache</text>
+      <text x="638" y="434" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">TLS Auth</text>
+
+      <rect x="705" y="405" width="120" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="765" y="422" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Cross-Region DR</text>
+      <text x="765" y="434" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Replication</text>
+
+      <rect x="840" y="405" width="150" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="915" y="422" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Memory Partition</text>
+      <text x="915" y="434" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Context Isolation</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 07                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="480" width="165" height="38" rx="5" fill="#0b1120" stroke="#14b8a6" stroke-width="1.2"/>
+      <text x="278" y="497" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Secrets + KMS</text>
+      <text x="278" y="509" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Rotation · Audit</text>
+
+      <rect x="375" y="480" width="155" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="453" y="497" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Identity Fed / SSO</text>
+      <text x="453" y="509" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">SAML · OIDC · PAM</text>
+
+      <rect x="545" y="480" width="160" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="625" y="497" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Agent Identity</text>
+      <text x="625" y="509" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Per-Agent Creds</text>
+
+      <rect x="720" y="480" width="155" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="798" y="497" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Capability Tokens</text>
+      <text x="798" y="509" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Scoped Action Auth</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 08                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="555" width="145" height="38" rx="5" fill="#0b1120" stroke="#10b981" stroke-width="1.2"/>
+      <text x="268" y="572" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Threat Det + SIEM</text>
+      <text x="268" y="584" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">GuardDuty · Sentinel</text>
+
+      <rect x="355" y="555" width="130" height="38" rx="5" fill="#0b1120" stroke="#10b981" stroke-width="1.2"/>
+      <text x="420" y="572" fill="#e8edf5" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">AI Monitoring</text>
+      <text x="420" y="584" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Drift · Halluc.</text>
+
+      <rect x="500" y="555" width="125" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="563" y="572" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">Chaos Engine</text>
+      <text x="563" y="584" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Fault Injection</text>
+
+      <rect x="640" y="555" width="120" height="38" rx="5" fill="#0b1120" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="700" y="572" fill="#ec4899" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">SIEM + SOAR</text>
+      <text x="700" y="584" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Auto Response</text>
+
+      <rect x="775" y="555" width="155" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="853" y="572" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Behavioral Telemetry</text>
+      <text x="853" y="584" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Self-Modify Detect</text>
+
+      <rect x="945" y="555" width="155" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="1023" y="572" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Loop Detection</text>
+      <text x="1023" y="584" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Runaway Prevention</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 09                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="630" width="140" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="265" y="647" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Kill Switch</text>
+      <text x="265" y="659" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Hardware Halt</text>
+
+      <rect x="350" y="630" width="145" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="423" y="647" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Capability Escalation</text>
+      <text x="423" y="659" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">L0-L5 Tiers</text>
+
+      <rect x="510" y="630" width="145" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="583" y="647" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Resource Confine</text>
+      <text x="583" y="659" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">CPU/GPU Quotas</text>
+
+      <rect x="670" y="630" width="150" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="745" y="647" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Self-Improve Gate</text>
+      <text x="745" y="659" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Weight Freeze</text>
+
+      <rect x="835" y="630" width="155" height="38" rx="5" fill="#0b1120" stroke="#d4a017" stroke-width="1.2"/>
+      <text x="913" y="647" fill="#d4a017" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Multi-Agent Quorum</text>
+      <text x="913" y="659" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Byzantine Consensus</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- NODES — LAYER 10                       -->
+      <!-- ═══════════════════════════════════════ -->
+      <rect x="195" y="705" width="145" height="38" rx="5" fill="#0b1120" stroke="#6366f1" stroke-width="1.2"/>
+      <text x="268" y="722" fill="#6366f1" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Value Alignment</text>
+      <text x="268" y="734" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Constitutional AI</text>
+
+      <rect x="355" y="705" width="145" height="38" rx="5" fill="#0b1120" stroke="#6366f1" stroke-width="1.2"/>
+      <text x="428" y="722" fill="#6366f1" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Interpretability</text>
+      <text x="428" y="734" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Transparency</text>
+
+      <rect x="515" y="705" width="140" height="38" rx="5" fill="#0b1120" stroke="#6366f1" stroke-width="1.2"/>
+      <text x="585" y="722" fill="#6366f1" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Corrigibility</text>
+      <text x="585" y="734" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Override Compliance</text>
+
+      <rect x="670" y="705" width="145" height="38" rx="5" fill="#0b1120" stroke="#6366f1" stroke-width="1.2"/>
+      <text x="743" y="722" fill="#6366f1" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Red Team Sim</text>
+      <text x="743" y="734" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">Adversarial AGI</text>
+
+      <rect x="830" y="705" width="155" height="38" rx="5" fill="#0b1120" stroke="#6366f1" stroke-width="1.2"/>
+      <text x="908" y="722" fill="#6366f1" font-family="JetBrains Mono, monospace" font-size="7" text-anchor="middle" font-weight="600">🧠 Regulatory</text>
+      <text x="908" y="734" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">EU AI Act · NIST</text>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- MAIN VERTICAL FLOW (left spine)                   -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <line x1="253" y1="70" x2="263" y2="103" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ao)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1s" repeatCount="indefinite"/></line>
+      <line x1="258" y1="145" x2="258" y2="178" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ac)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1.1s" repeatCount="indefinite"/></line>
+      <line x1="258" y1="220" x2="263" y2="253" stroke="#10b981" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ag)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1.2s" repeatCount="indefinite"/></line>
+      <line x1="260" y1="295" x2="260" y2="328" stroke="#8b5cf6" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ap)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1.3s" repeatCount="indefinite"/></line>
+      <line x1="253" y1="370" x2="253" y2="403" stroke="#ef4444" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1.4s" repeatCount="indefinite"/></line>
+      <line x1="253" y1="445" x2="270" y2="478" stroke="#14b8a6" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#at)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1.5s" repeatCount="indefinite"/></line>
+      <line x1="268" y1="520" x2="268" y2="553" stroke="#10b981" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ag)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1.6s" repeatCount="indefinite"/></line>
+      <line x1="265" y1="595" x2="265" y2="628" stroke="#d4a017" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ago)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1.7s" repeatCount="indefinite"/></line>
+      <line x1="265" y1="670" x2="268" y2="703" stroke="#6366f1" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ai)"><animate attributeName="stroke-dashoffset" values="16;0" dur="1.8s" repeatCount="indefinite"/></line>
+
+      <!-- User entry -->
+      <line x1="150" y1="49" x2="193" y2="49" stroke="#3b82f6" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#ab)"><animate attributeName="stroke-dashoffset" values="16;0" dur="0.8s" repeatCount="indefinite"/></line>
+      <text x="130" y="42" fill="#3b82f666" font-family="JetBrains Mono, monospace" font-size="7">👤</text>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- HORIZONTAL INTERNAL FLOWS (per layer)             -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- L1 -->
+      <line x1="312" y1="49" x2="323" y2="49" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="442" y1="49" x2="453" y2="49" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="572" y1="49" x2="583" y2="49" stroke="#ec4899" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="712" y1="49" x2="723" y2="49" stroke="#d4a017" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="867" y1="49" x2="878" y2="49" stroke="#d4a017" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="1022" y1="49" x2="1033" y2="49" stroke="#d4a017" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <!-- L2 -->
+      <line x1="332" y1="124" x2="343" y2="124" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="472" y1="124" x2="483" y2="124" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="622" y1="124" x2="633" y2="124" stroke="#ec4899" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="757" y1="124" x2="768" y2="124" stroke="#ec4899" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="902" y1="124" x2="913" y2="124" stroke="#d4a017" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+      <line x1="1057" y1="124" x2="1068" y2="124" stroke="#d4a017" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"><animate attributeName="stroke-dashoffset" values="10;0" dur="0.6s" repeatCount="indefinite"/></line>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- CROSS-LAYER CONNECTIONS (the differentiator!)     -->
+      <!-- ══════════════════════════════════════════════════ -->
+
+      <!-- Edge → Observability (skip 6 layers - threat intel feedback) -->
+      <path d="M 1100 70 C 1180 70, 1200 300, 1200 572 L 1102 572" stroke="#10b981" stroke-width="1.2" stroke-dasharray="4 3" fill="none" opacity="0.35" marker-end="url(#ag)">
+        <animate attributeName="stroke-dashoffset" values="14;0" dur="2.5s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Observability → Edge (feedback loop up right side) -->
+      <path d="M 1100 595 C 1220 595, 1240 350, 1240 49 L 1167 49" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="4 3" fill="none" opacity="0.3" marker-end="url(#ab)">
+        <animate attributeName="stroke-dashoffset" values="0;14" dur="2.8s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Ethical Containment → Control Plane (feedback loop) -->
+      <path d="M 268 703 C 140 703, 130 500, 130 272 L 193 272" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="4 3" fill="none" opacity="0.3" marker-end="url(#ai)">
+        <animate attributeName="stroke-dashoffset" values="0;14" dur="3s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- AGI Governance → Edge (kill switch feedback) -->
+      <path d="M 265 628 C 100 628, 90 400, 90 49 L 193 49" stroke="#d4a017" stroke-width="1.2" stroke-dasharray="4 3" fill="none" opacity="0.25" marker-end="url(#ago)">
+        <animate attributeName="stroke-dashoffset" values="0;14" dur="3.5s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Secrets → ALL layers (vertical spanning line right) -->
+      <line x1="170" y1="499" x2="170" y2="49" stroke="#14b8a6" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.2">
+        <animate attributeName="stroke-dashoffset" values="0;10" dur="2s" repeatCount="indefinite"/>
+      </line>
+      <text x="155" y="280" fill="#14b8a620" font-family="JetBrains Mono, monospace" font-size="5" transform="rotate(-90 155 280)">KMS/SECRETS FABRIC</text>
+
+      <!-- Gateway → Guardrails (cross-layer input validation) -->
+      <path d="M 553 145 C 600 200, 580 300, 548 328" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 3" fill="none" opacity="0.3" marker-end="url(#ao)">
+        <animate attributeName="stroke-dashoffset" values="12;0" dur="2s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Control Plane → Data (direct model access) -->
+      <path d="M 408 295 C 420 330, 400 380, 383 403" stroke="#10b981" stroke-width="1" stroke-dasharray="3 3" fill="none" opacity="0.3" marker-end="url(#ag)">
+        <animate attributeName="stroke-dashoffset" values="12;0" dur="1.8s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Guardrails → Observability (compliance signals) -->
+      <path d="M 853 370 C 870 420, 860 510, 853 553" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="3 3" fill="none" opacity="0.3" marker-end="url(#ap)">
+        <animate attributeName="stroke-dashoffset" values="12;0" dur="2.2s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Observability → AGI Governance (telemetry feed) -->
+      <line x1="853" y1="595" x2="745" y2="628" stroke="#d4a017" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.35" marker-end="url(#ago)">
+        <animate attributeName="stroke-dashoffset" values="14;0" dur="1.5s" repeatCount="indefinite"/>
+      </line>
+
+      <!-- AGI Governance → Ethical (direct feed) -->
+      <line x1="583" y1="670" x2="585" y2="703" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.35" marker-end="url(#ai)">
+        <animate attributeName="stroke-dashoffset" values="14;0" dur="1.3s" repeatCount="indefinite"/>
+      </line>
+
+      <!-- Human-in-Loop → Kill Switch (emergency path) -->
+      <path d="M 883 295 C 920 400, 500 550, 265 628" stroke="#ef4444" stroke-width="1" stroke-dasharray="3 4" fill="none" opacity="0.25" marker-end="url(#ar)">
+        <animate attributeName="stroke-dashoffset" values="14;0" dur="3s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Reasoning Validator → Emergent Behavior (cross-connect) -->
+      <path d="M 985 145 C 1000 220, 920 300, 853 328" stroke="#d4a017" stroke-width="1" stroke-dasharray="3 3" fill="none" opacity="0.25" marker-end="url(#ago)">
+        <animate attributeName="stroke-dashoffset" values="12;0" dur="2.5s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Red Team → Gateway (adversarial testing feedback) -->
+      <path d="M 743 743 C 743 780, 1150 780, 1150 400 C 1150 200, 1140 145, 1070 124" stroke="#6366f1" stroke-width="1" stroke-dasharray="3 4" fill="none" opacity="0.2" marker-end="url(#ai)">
+        <animate attributeName="stroke-dashoffset" values="0;14" dur="4s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Agent Identity → Agent Isolation (identity mesh) -->
+      <line x1="625" y1="478" x2="840" y2="220" stroke="#d4a017" stroke-width="0.8" stroke-dasharray="2 3" fill="none" opacity="0.2">
+        <animate attributeName="stroke-dashoffset" values="10;0" dur="2s" repeatCount="indefinite"/>
+      </line>
+
+      <!-- Cognitive Sandbox → Self-Improve Gate -->
+      <line x1="1005" y1="220" x2="745" y2="628" stroke="#d4a017" stroke-width="0.8" stroke-dasharray="2 3" fill="none" opacity="0.15">
+        <animate attributeName="stroke-dashoffset" values="10;0" dur="3s" repeatCount="indefinite"/>
+      </line>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- ANIMATED PARTICLE DOTS (traveling along paths)    -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- Main spine particle -->
+      <circle r="3.5" fill="url(#pB)" opacity="0.9">
+        <animateMotion path="M 253 49 L 253 124 L 253 199 L 253 274 L 253 349 L 253 424 L 270 499 L 268 574 L 265 649 L 268 724" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Second particle offset -->
+      <circle r="3" fill="url(#pG)" opacity="0.7">
+        <animateMotion path="M 253 49 L 253 124 L 253 199 L 253 274 L 253 349 L 253 424 L 270 499 L 268 574 L 265 649 L 268 724" dur="8s" repeatCount="indefinite" begin="4s"/>
+      </circle>
+      <!-- Cross-layer particles -->
+      <circle r="2.5" fill="url(#pGo)" opacity="0.8">
+        <animateMotion path="M 1100 70 C 1180 70, 1200 300, 1200 572 L 1102 572" dur="4s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="2.5" fill="url(#pI)" opacity="0.8">
+        <animateMotion path="M 268 703 C 140 703, 130 500, 130 272 L 193 272" dur="5s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="2.5" fill="url(#pR)" opacity="0.6">
+        <animateMotion path="M 883 295 C 920 400, 500 550, 265 628" dur="4.5s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Feedback up right side -->
+      <circle r="2.5" fill="url(#pB)" opacity="0.6">
+        <animateMotion path="M 1100 595 C 1220 595, 1240 350, 1240 49 L 1167 49" dur="5s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Kill switch feedback -->
+      <circle r="3" fill="url(#pGo)" opacity="0.7">
+        <animateMotion path="M 265 628 C 100 628, 90 400, 90 49 L 193 49" dur="6s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- PULSE RINGS at key nodes                          -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <circle cx="253" cy="49" r="4" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.5"><animate attributeName="r" values="4;11;4" dur="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite"/></circle>
+      <circle cx="263" cy="124" r="4" fill="none" stroke="#f59e0b" stroke-width="1" opacity="0.5"><animate attributeName="r" values="4;11;4" dur="2.2s" repeatCount="indefinite" begin="0.2s"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite" begin="0.2s"/></circle>
+      <circle cx="258" cy="199" r="4" fill="none" stroke="#06b6d4" stroke-width="1" opacity="0.5"><animate attributeName="r" values="4;11;4" dur="2.2s" repeatCount="indefinite" begin="0.4s"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite" begin="0.4s"/></circle>
+      <circle cx="263" cy="274" r="4" fill="none" stroke="#10b981" stroke-width="1" opacity="0.5"><animate attributeName="r" values="4;11;4" dur="2.2s" repeatCount="indefinite" begin="0.6s"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite" begin="0.6s"/></circle>
+      <circle cx="260" cy="349" r="4" fill="none" stroke="#8b5cf6" stroke-width="1" opacity="0.5"><animate attributeName="r" values="4;11;4" dur="2.2s" repeatCount="indefinite" begin="0.8s"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite" begin="0.8s"/></circle>
+      <circle cx="253" cy="424" r="4" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.5"><animate attributeName="r" values="4;11;4" dur="2.2s" repeatCount="indefinite" begin="1s"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite" begin="1s"/></circle>
+      <circle cx="265" cy="649" r="4" fill="none" stroke="#d4a017" stroke-width="1" opacity="0.5"><animate attributeName="r" values="4;11;4" dur="2.2s" repeatCount="indefinite" begin="1.4s"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite" begin="1.4s"/></circle>
+      <circle cx="268" cy="724" r="4" fill="none" stroke="#6366f1" stroke-width="1" opacity="0.5"><animate attributeName="r" values="4;11;4" dur="2.2s" repeatCount="indefinite" begin="1.6s"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite" begin="1.6s"/></circle>
+
+      <!-- AGI-specific glowing nodes -->
+      <circle cx="795" cy="49" r="5" fill="none" stroke="#d4a017" stroke-width="1.2" opacity="0.4" filter="url(#glGo)"><animate attributeName="r" values="5;14;5" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite"/></circle>
+      <circle cx="265" cy="649" r="5" fill="none" stroke="#d4a017" stroke-width="1.2" opacity="0.4" filter="url(#glGo)"><animate attributeName="r" values="5;14;5" dur="3s" repeatCount="indefinite" begin="1s"/><animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite" begin="1s"/></circle>
+      <circle cx="585" cy="724" r="5" fill="none" stroke="#6366f1" stroke-width="1.2" opacity="0.4" filter="url(#glI)"><animate attributeName="r" values="5;14;5" dur="3s" repeatCount="indefinite" begin="2s"/><animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite" begin="2s"/></circle>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- LEGEND                                            -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <rect x="12" y="770" width="1236" height="40" rx="8" fill="#0b1120" stroke="#141f3822" stroke-width="1"/>
+      <circle cx="35" cy="790" r="4" fill="#3b82f6"/><text x="44" y="793" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="6.5">Original</text>
+      <circle cx="110" cy="790" r="4" fill="#ec4899"/><text x="119" y="793" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="6.5">V2 Added</text>
+      <circle cx="190" cy="790" r="4" fill="#d4a017"/><text x="199" y="793" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="6.5">🧠 AGI Innovation</text>
+      <circle cx="310" cy="790" r="4" fill="#6366f1"/><text x="319" y="793" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="6.5">🧠 Ethical Containment</text>
+
+      <line x1="450" y1="790" x2="468" y2="790" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4 2"><animate attributeName="stroke-dashoffset" values="12;0" dur="0.7s" repeatCount="indefinite"/></line>
+      <text x="474" y="793" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="6.5">Request Flow</text>
+
+      <line x1="560" y1="790" x2="578" y2="790" stroke="#6366f1" stroke-width="1" stroke-dasharray="3 3"><animate attributeName="stroke-dashoffset" values="0;12" dur="0.7s" repeatCount="indefinite"/></line>
+      <text x="584" y="793" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="6.5">Feedback Loop</text>
+
+      <circle cx="682" cy="790" r="4" fill="none" stroke="#d4a017" stroke-width="1"><animate attributeName="r" values="3;7;3" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="1.5s" repeatCount="indefinite"/></circle>
+      <text x="694" y="793" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="6.5">Active Node</text>
+
+      <circle r="3" fill="#3b82f6" opacity="0.8"><animateMotion path="M 780 790 L 810 790" dur="1s" repeatCount="indefinite"/></circle>
+      <text x="820" y="793" fill="#8b9dc3" font-family="JetBrains Mono, monospace" font-size="6.5">Data Particle</text>
+
+      <!-- Connection counts -->
+      <text x="950" y="787" fill="#556a8e" font-family="JetBrains Mono, monospace" font-size="6">10 LAYERS</text>
+      <text x="950" y="797" fill="#556a8e" font-family="JetBrains Mono, monospace" font-size="6">65+ NODES</text>
+      <text x="1060" y="787" fill="#556a8e" font-family="JetBrains Mono, monospace" font-size="6">12 CROSS-LAYER LINKS</text>
+      <text x="1060" y="797" fill="#556a8e" font-family="JetBrains Mono, monospace" font-size="6">7 FEEDBACK LOOPS</text>
+
+    </svg>
+  </div>
+
+  <div class="author-strip">
+    <div>
+      <div class="name">Kenneth P. Barnes, Ph.D.</div>
+      <div class="role">Chief Technical Architect / CTO / CISO — UCS Solutions &nbsp;·&nbsp; CISSP · CISM · CCSP · TOGAF · SABSA</div>
+    </div>
+    <div class="tags">
+      #ZeroTrust #AIArchitecture #AGISafety #CyberSecurity #CloudSecurity #AIGovernance
+      #EnterpriseArchitecture #AgenticAI #LLMSecurity #NIST #EUAIAct #ResponsibleAI
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
