@@ -14,8 +14,11 @@ The plan delivers three efforts that normally take a year or more each, together
 |---|---|
 | [`index.html`](index.html) | Interactive Security Architecture Command Center: roadmap, practice model, pattern library with reference diagrams and control mappings, Azure assessment plan, policy-as-code guardrails, control spine (NIST CSF 2.0, NIST SP 800-53, CIS v8, Zero Trust, FERPA, GLBA Safeguards Rule, PCI DSS), STRIDE, and the AI / AGI forward look |
 | [`KBarnes_SNHU_SecurityArchitecturePractice_Deck.pptx`](KBarnes_SNHU_SecurityArchitecturePractice_Deck.pptx) | 28-slide proposal deck with speaker notes on every slide |
+| [`KBarnes_SNHU_SecurityArchitecturePractice_Resume.docx`](KBarnes_SNHU_SecurityArchitecturePractice_Resume.docx) | Resume aligned to the deck: requirements-to-evidence for each part of the plan |
+| [`KBarnes_SNHU_SecurityArchitecturePractice_CoverLetter.docx`](KBarnes_SNHU_SecurityArchitecturePractice_CoverLetter.docx) | Cover letter for the engagement |
+| [`UCS-SOC-Sentinel-AgenticZeroTrust-CommandCenter-v2.html`](UCS-SOC-Sentinel-AgenticZeroTrust-CommandCenter-v2.html) | Agentic Zero-Trust SOC Command Center v2 (illustrative): Sentinel, Foundry, Copilot for Security, Purview and Entra agent fleet |
 
-To view the command center, download `index.html` (Raw → save) and open it in any modern browser. It is a single self-contained file.
+**Viewing the files:** GitHub shows HTML as source code. Open a file above, choose **Download raw file**, and open it in any modern browser; each page is a single self-contained file. The deck and Word files open in PowerPoint and Word (or download and preview).
 
 ## Forward look
 

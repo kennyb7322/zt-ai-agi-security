@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UCS · Agentic Zero-Trust SOC Command Center · Sentinel + Foundry + Copilot Security · v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --bg-void:#05070f;
+  --bg-deep:#080b16;
+  --bg-panel:#0c1122;
+  --bg-elevated:#111830;
+  --grid-line:rgba(0,229,255,.07);
+  --neon-cyan:#00e5ff;
+  --neon-cyan-dim:#0aa9bd;
+  --neon-magenta:#ff2d95;
+  --neon-purple:#9d6bff;
+  --neon-lime:#39ff14;
+  --neon-amber:#ffb020;
+  --neon-red:#ff3b5c;
+  --neon-blue:#3b82f6;
+  --txt-bright:#eaf6ff;
+  --txt:#b9c7e0;
+  --txt-dim:#6f7fa6;
+  --txt-faint:#465573;
+  --border:rgba(0,229,255,.18);
+  --border-hot:rgba(255,45,149,.35);
+  --glass:rgba(12,17,34,.72);
+  --glass-2:rgba(17,24,48,.6);
+  --shadow:0 8px 40px rgba(0,0,0,.6);
+  --glow-cyan:0 0 18px rgba(0,229,255,.45);
+  --glow-magenta:0 0 18px rgba(255,45,149,.45);
+  --glow-lime:0 0 14px rgba(57,255,20,.4);
+  --ok:var(--neon-lime);
+  --warn:var(--neon-amber);
+  --crit:var(--neon-red);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Rajdhani',sans-serif;
+  background:var(--bg-void);
+  color:var(--txt);
+  line-height:1.45;
+  overflow-x:hidden;
+  background-image:
+    linear-gradient(var(--grid-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-line) 1px,transparent 1px),
+    radial-gradient(circle at 15% 10%,rgba(157,107,255,.10),transparent 45%),
+    radial-gradient(circle at 85% 90%,rgba(255,45,149,.08),transparent 45%);
+  background-size:46px 46px,46px 46px,100% 100%,100% 100%;
+  background-attachment:fixed;
+}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:var(--bg-deep)}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--neon-cyan-dim),var(--neon-purple));border-radius:6px;border:2px solid var(--bg-deep)}
+::-webkit-scrollbar-thumb:hover{background:var(--neon-cyan)}
+a{color:var(--neon-cyan);text-decoration:none}
+mark{background:rgba(0,229,255,.18);color:var(--neon-cyan);padding:0 4px;border-radius:3px}
+
+/* scanline overlay */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 2px,rgba(0,0,0,.045) 3px,rgba(0,0,0,0) 4px);
+  mix-blend-mode:overlay;opacity:.5;
+}
+
+/* ===== HEADER ===== */
+header.topband{
+  position:sticky;top:0;z-index:500;
+  background:linear-gradient(180deg,rgba(5,7,15,.97),rgba(8,11,22,.86));
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(14px);
+  box-shadow:0 4px 30px rgba(0,0,0,.5);
+}
+.topband-inner{display:flex;align-items:center;gap:18px;padding:14px 26px;flex-wrap:wrap}
+.brand-badge{
+  width:46px;height:46px;border-radius:11px;flex:0 0 auto;position:relative;
+  background:linear-gradient(135deg,#0c1122,#15203f);
+  border:1px solid var(--neon-cyan);
+  box-shadow:var(--glow-cyan),inset 0 0 14px rgba(0,229,255,.18);
+  display:grid;place-items:center;
+}
+.brand-badge svg{width:28px;height:28px}
+.brand-text h1{
+  font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:2px;
+  font-size:1.18rem;color:var(--txt-bright);text-shadow:var(--glow-cyan);line-height:1.05;
+}
+.brand-text .sub{font-size:.78rem;letter-spacing:3px;color:var(--neon-magenta);text-transform:uppercase;font-weight:600}
+.topband-spacer{flex:1 1 auto}
+.live-cluster{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.range-pill{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--txt);
+  background:var(--glass-2);border:1px solid var(--border);border-radius:8px;
+  padding:7px 12px;display:flex;align-items:center;gap:8px;
+}
+.range-pill select{background:transparent;border:none;color:var(--neon-cyan);font-family:inherit;font-size:.72rem;outline:none;cursor:pointer}
+.range-pill select option{background:var(--bg-panel)}
+.ver-chip{
+  font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px;
+  color:var(--bg-void);background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple));
+  padding:6px 12px;border-radius:7px;box-shadow:var(--glow-cyan);
+}
+.clock{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--txt-dim);letter-spacing:.5px}
+.dot-live{width:9px;height:9px;border-radius:50%;background:var(--neon-lime);box-shadow:var(--glow-lime);animation:livepulse 1.6s infinite}
+@keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+/* ===== LAYOUT ===== */
+.shell{display:flex;align-items:flex-start;max-width:1880px;margin:0 auto}
+nav.sidenav{
+  position:sticky;top:75px;align-self:flex-start;
+  width:248px;flex:0 0 248px;
+  max-height:calc(100vh - 90px);overflow-y:auto;
+  padding:18px 12px 40px;margin:14px 0 0 14px;
+  background:var(--glass);border:1px solid var(--border);border-radius:14px;
+  backdrop-filter:blur(10px);
+}
+.nav-group{margin-bottom:6px}
+.nav-group-head{
+  font-family:'Orbitron',sans-serif;font-size:.66rem;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--txt-faint);padding:10px 12px 6px;
+}
+.nav-link{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:9px;color:var(--txt);font-weight:600;
+  font-size:.86rem;cursor:pointer;border:1px solid transparent;transition:all .18s;
+  position:relative;
+}
+.nav-link:hover{background:var(--glass-2);color:var(--neon-cyan);border-color:var(--border)}
+.nav-link.active{
+  background:linear-gradient(90deg,rgba(0,229,255,.16),rgba(157,107,255,.05));
+  color:var(--neon-cyan);border-color:var(--border);
+  box-shadow:inset 2px 0 0 var(--neon-cyan);
+}
+.nav-ico{width:18px;height:18px;flex:0 0 auto;opacity:.85}
+.nav-toggle{display:none}
+
+main.content{flex:1 1 auto;min-width:0;padding:14px 22px 80px}
+
+/* ===== SECTION ===== */
+section.zone{margin-bottom:40px;scroll-margin-top:84px}
+.zone-head{display:flex;align-items:center;gap:14px;margin:6px 0 18px}
+.zone-head .bar{width:4px;height:30px;border-radius:3px;background:linear-gradient(var(--neon-cyan),var(--neon-magenta));box-shadow:var(--glow-cyan)}
+.zone-head h2{font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:1.5px;font-size:1.15rem;color:var(--txt-bright)}
+.zone-head .tag{
+  margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:1px;
+  color:var(--txt-dim);border:1px solid var(--border);border-radius:6px;padding:4px 9px;background:var(--glass-2)
+}
+.zone-sub{color:var(--txt-dim);font-size:.92rem;margin:-8px 0 18px;max-width:900px}
+
+/* ===== GRID + CARDS ===== */
+.grid{display:grid;gap:16px}
+.g-kpi{grid-template-columns:repeat(5,minmax(0,1fr))}
+.g-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:1500px){.g-kpi{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:1280px){.g-kpi,.g-4{grid-template-columns:repeat(2,minmax(0,1fr))}.g-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.g-kpi,.g-4,.g-3,.g-2{grid-template-columns:minmax(0,1fr)}}
+
+/* ===== MOBILE / TABLET: sidenav becomes an off-canvas drawer so content gets full width ===== */
+@media(max-width:900px){
+  .shell{display:block}                       /* stop reserving 248px for the rail */
+  main.content{width:100%;padding:6px 14px 70px}
+  .nav-toggle{
+    display:inline-flex;align-items:center;gap:8px;
+    margin:12px 0 2px 14px;padding:9px 15px;border-radius:10px;
+    background:var(--glass);border:1px solid var(--neon-cyan);
+    color:var(--neon-cyan);font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:1.5px;
+    cursor:pointer;box-shadow:var(--glow-cyan);backdrop-filter:blur(8px);
+  }
+  .nav-toggle::after{content:"MENU"}
+  nav.sidenav{
+    position:fixed;top:0;left:0;bottom:0;z-index:700;
+    width:284px;max-width:86vw;flex:none;margin:0;border-radius:0 14px 14px 0;
+    max-height:none;overflow-y:auto;
+    transform:translateX(-104%);
+    transition:transform .26s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 10px 60px rgba(0,0,0,.7);
+  }
+  nav.sidenav.open{transform:translateX(0)}
+  body.nav-open{overflow:hidden}
+  body.nav-open::before{
+    content:"";position:fixed;inset:0;z-index:690;
+    background:rgba(2,4,10,.6);backdrop-filter:blur(2px);
+  }
+}
+
+.card{
+  background:var(--glass);border:1px solid var(--border);border-radius:14px;
+  padding:16px 18px;position:relative;overflow:hidden;backdrop-filter:blur(8px);
+  transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);opacity:.5;
+}
+.card.clickable{cursor:pointer}
+.card.clickable:hover{transform:translateY(-3px);border-color:var(--neon-cyan);box-shadow:var(--glow-cyan)}
+.card-corner{position:absolute;bottom:8px;right:10px;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txt-faint);letter-spacing:.5px}
+.card h3{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt-dim);font-weight:500;margin-bottom:4px}
+.card .card-by{font-size:.66rem;color:var(--txt-faint);font-family:'JetBrains Mono',monospace;margin-bottom:10px}
+
+/* KPI */
+.kpi-val{font-family:'Orbitron',sans-serif;font-weight:900;font-size:2.5rem;line-height:1;color:var(--txt-bright);text-shadow:var(--glow-cyan)}
+.kpi-val.red{color:var(--neon-red);text-shadow:var(--glow-magenta)}
+.kpi-val.green{color:var(--neon-lime);text-shadow:var(--glow-lime)}
+.kpi-trend{font-size:.8rem;font-weight:600;margin-top:8px;display:flex;align-items:center;gap:6px}
+.kpi-trend .up{color:var(--neon-red)}
+.kpi-trend .down{color:var(--neon-lime)}
+.kpi-trend .vs{color:var(--txt-faint);font-size:.72rem;font-family:'JetBrains Mono',monospace}
+/* sparkline: canvas MUST live in a fixed-height wrapper, otherwise Chart.js
+   responsive sizing reads the unconstrained card height and grows without bound */
+.spark-wrap{position:relative;height:42px;margin-top:12px;width:100%}
+.spark-wrap canvas{position:absolute!important;inset:0;width:100%!important;height:100%!important}
+
+.chart-wrap{position:relative;height:190px;margin-top:8px;min-width:0}
+.chart-wrap.tall{height:230px}
+.chart-wrap.short{height:150px}
+/* hard-contain every chart canvas so none can ever feedback-loop its host */
+.chart-wrap canvas,.donut-host canvas{position:absolute!important;inset:0;width:100%!important;height:100%!important}
+
+/* donut center label */
+.donut-host{position:relative;height:200px}
+.donut-center{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;text-align:center}
+.donut-center .big{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.7rem;color:var(--txt-bright)}
+.donut-center .lab{font-size:.62rem;letter-spacing:1px;color:var(--txt-dim);text-transform:uppercase}
+
+/* lists / tables */
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .15s}
+.rank-row:hover{background:rgba(0,229,255,.05)}
+.rank-row:last-child{border-bottom:none}
+.rank-ico{width:22px;height:22px;border-radius:5px;flex:0 0 auto;display:grid;place-items:center;font-size:.6rem;font-family:'JetBrains Mono',monospace;font-weight:700}
+.rank-name{flex:1 1 auto;font-weight:600;font-size:.9rem;color:var(--txt)}
+.rank-val{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--neon-cyan);font-size:1rem}
+.bar-track{flex:1 1 auto;height:9px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden}
+.bar-fill{height:100%;border-radius:5px}
+
+/* compliance rows */
+.comp-row{margin-bottom:13px}
+.comp-row .lbl{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:5px}
+.comp-row .lbl b{color:var(--txt);font-weight:600}
+.comp-row .lbl .pct{font-family:'Orbitron',sans-serif;color:var(--neon-lime);font-weight:700}
+
+/* status pill */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.66rem;font-weight:700;letter-spacing:.6px;padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.pill .pdot{width:7px;height:7px;border-radius:50%}
+.pill.ok{background:rgba(57,255,20,.12);color:var(--neon-lime);border:1px solid rgba(57,255,20,.3)}
+.pill.ok .pdot{background:var(--neon-lime)}
+.pill.warn{background:rgba(255,176,32,.12);color:var(--neon-amber);border:1px solid rgba(255,176,32,.3)}
+.pill.warn .pdot{background:var(--neon-amber);animation:livepulse 1.4s infinite}
+.pill.crit{background:rgba(255,59,92,.12);color:var(--neon-red);border:1px solid rgba(255,59,92,.35)}
+.pill.crit .pdot{background:var(--neon-red);animation:livepulse 1s infinite}
+.pill.run{background:rgba(0,229,255,.12);color:var(--neon-cyan);border:1px solid rgba(0,229,255,.3)}
+.pill.run .pdot{background:var(--neon-cyan);animation:livepulse 1.2s infinite}
+
+/* morning dashboard strip */
+.morning{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:1100px){.morning{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.morning{grid-template-columns:1fr}}
+.morn-item{display:flex;gap:11px;align-items:flex-start;padding:13px;border-radius:11px;background:var(--glass-2);border:1px solid var(--border)}
+.morn-item .mi{width:30px;height:30px;flex:0 0 auto;border-radius:8px;display:grid;place-items:center;background:rgba(0,229,255,.1);border:1px solid var(--border)}
+.morn-item h4{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:.8px;color:var(--neon-cyan);text-transform:uppercase;margin-bottom:3px}
+.morn-item p{font-size:.78rem;color:var(--txt-dim);line-height:1.35}
+
+/* agent cards */
+.agent-card{
+  background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;
+  cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.agent-card:hover{transform:translateY(-3px);border-color:var(--neon-magenta);box-shadow:var(--glow-magenta)}
+.agent-card .ah{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.agent-ico{width:38px;height:38px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;background:linear-gradient(135deg,#15203f,#0c1122);border:1px solid var(--border)}
+.agent-card h3{font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:.6px;color:var(--txt-bright);text-transform:none}
+.agent-card .role{font-size:.7rem;color:var(--neon-purple);font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.agent-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.metric-chip{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--txt);background:var(--glass-2);border:1px solid var(--border);border-radius:6px;padding:4px 8px}
+.metric-chip b{color:var(--neon-cyan)}
+.agent-desc{font-size:.82rem;color:var(--txt-dim);margin-top:10px;line-height:1.4}
+
+/* pipeline / flow */
+.flowstrip{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin-top:6px}
+.flow-node{
+  flex:1 1 150px;min-width:150px;background:var(--glass-2);border:1px solid var(--border);border-radius:11px;
+  padding:13px;position:relative;text-align:center;
+}
+.flow-node .fn-step{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--neon-magenta);letter-spacing:1px}
+.flow-node h4{font-family:'Orbitron',sans-serif;font-size:.74rem;color:var(--txt-bright);margin:5px 0;letter-spacing:.4px}
+.flow-node p{font-size:.72rem;color:var(--txt-dim);line-height:1.3}
+.flow-arrow{display:grid;place-items:center;color:var(--neon-cyan);font-size:1.3rem;padding:0 6px;flex:0 0 auto}
+@media(max-width:900px){.flow-arrow{transform:rotate(90deg);padding:6px 0}}
+
+/* code block */
+.codebox{
+  background:#06080f;border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-top:10px;
+}
+.codebox-head{display:flex;align-items:center;gap:8px;padding:9px 13px;background:rgba(0,229,255,.05);border-bottom:1px solid var(--border)}
+.codebox-head .cdot{width:10px;height:10px;border-radius:50%}
+.codebox-head .ctitle{margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--txt-dim)}
+.codebox-head .ctag{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--neon-lime);border:1px solid rgba(57,255,20,.3);border-radius:5px;padding:2px 7px}
+.codebox pre{padding:14px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.74rem;line-height:1.55;color:#c8d6f0}
+.codebox pre .k{color:var(--neon-magenta)}
+.codebox pre .s{color:var(--neon-lime)}
+.codebox pre .c{color:var(--txt-faint);font-style:italic}
+.codebox pre .v{color:var(--neon-cyan)}
+.codebox pre .f{color:var(--neon-amber)}
+
+/* zero trust 3D host */
+#zt-canvas-host{height:440px;border-radius:14px;border:1px solid var(--border);background:radial-gradient(circle at 50% 50%,rgba(157,107,255,.07),transparent 70%),var(--bg-deep);position:relative;overflow:hidden}
+.zt-hint{position:absolute;bottom:12px;left:14px;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--txt-faint);pointer-events:none}
+.zt-readout{position:absolute;top:12px;right:14px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:10px 13px;max-width:240px;backdrop-filter:blur(8px)}
+.zt-readout h5{font-family:'Orbitron',sans-serif;font-size:.72rem;color:var(--neon-cyan);letter-spacing:.5px;margin-bottom:4px}
+.zt-readout p{font-size:.74rem;color:var(--txt-dim);line-height:1.35}
+/* 2D SVG fallback (rendered when WebGL is unavailable) */
+.zt-svg{position:absolute;inset:0;width:100%;height:100%}
+.zt-svg .ztnode,.zt-svg .ztcore{cursor:pointer;transition:opacity .15s}
+.zt-svg .ztnode>circle:first-of-type,.zt-svg .ztcore>circle:first-of-type{transition:fill-opacity .15s,stroke-width .15s}
+.zt-svg .ztnode:hover>circle:first-of-type,.zt-svg .ztcore:hover>circle:first-of-type{fill-opacity:.3}
+.zt-svg .ztnode:focus,.zt-svg .ztcore:focus{outline:none}
+.zt-svg .ztnode:focus>circle:first-of-type,.zt-svg .ztcore:focus>circle:first-of-type{stroke-width:3}
+.zt-svg .ztpulse{transform-box:fill-box;transform-origin:center;animation:ztpulse 2.8s ease-out infinite}
+@keyframes ztpulse{0%{opacity:.6;transform:scale(1)}70%{opacity:0;transform:scale(1.45)}100%{opacity:0;transform:scale(1.45)}}
+
+/* SaaS tier cards */
+.tier{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden}
+.tier.featured{border-color:var(--neon-magenta);box-shadow:var(--glow-magenta)}
+.tier .badge-feat{position:absolute;top:14px;right:-30px;transform:rotate(45deg);background:var(--neon-magenta);color:#fff;font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:1px;padding:4px 38px;font-weight:700}
+.tier h3{font-family:'Orbitron',sans-serif;font-size:1.05rem;color:var(--txt-bright);letter-spacing:1px;text-transform:none;margin-bottom:4px}
+.tier .price{font-family:'Orbitron',sans-serif;font-size:1.8rem;color:var(--neon-cyan);font-weight:900;margin:8px 0;text-shadow:var(--glow-cyan)}
+.tier .price small{font-size:.7rem;color:var(--txt-dim);letter-spacing:.5px}
+.tier ul{list-style:none;margin-top:12px}
+.tier li{font-size:.82rem;color:var(--txt);padding:6px 0 6px 24px;position:relative;border-bottom:1px solid rgba(255,255,255,.04)}
+.tier li::before{content:"▹";position:absolute;left:4px;color:var(--neon-lime)}
+
+/* plugin matrix */
+.plug-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1100px){.plug-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.plug-grid{grid-template-columns:1fr}}
+.plug{background:var(--glass-2);border:1px solid var(--border);border-radius:11px;padding:14px;text-align:center;transition:all .18s;cursor:pointer}
+.plug:hover{border-color:var(--neon-cyan);transform:translateY(-2px);box-shadow:var(--glow-cyan)}
+.plug .pi{width:42px;height:42px;margin:0 auto 9px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#15203f,#0c1122);border:1px solid var(--border)}
+.plug h4{font-family:'Orbitron',sans-serif;font-size:.74rem;color:var(--txt-bright);letter-spacing:.4px;text-transform:none;margin-bottom:4px}
+.plug p{font-size:.7rem;color:var(--txt-dim);line-height:1.3}
+
+/* ===== MODAL ===== */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:1000;background:rgba(2,4,10,.82);backdrop-filter:blur(7px);
+  display:none;align-items:flex-start;justify-content:center;padding:40px 18px;overflow-y:auto;
+}
+.modal-backdrop.open{display:flex}
+.modal{
+  width:min(940px,100%);background:linear-gradient(180deg,var(--bg-elevated),var(--bg-panel));
+  border:1px solid var(--neon-cyan);border-radius:16px;box-shadow:0 0 60px rgba(0,229,255,.25),var(--shadow);
+  position:relative;animation:modalin .25s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes modalin{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
+.modal-head{
+  position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:14px;
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,var(--bg-elevated),rgba(17,24,48,.9));border-radius:16px 16px 0 0;backdrop-filter:blur(8px);
+}
+.modal-head .mh-ico{width:42px;height:42px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;background:linear-gradient(135deg,#15203f,#0c1122);border:1px solid var(--neon-cyan);box-shadow:var(--glow-cyan)}
+.modal-head h2{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--txt-bright);letter-spacing:.6px;line-height:1.1}
+.modal-head .mh-sub{font-size:.74rem;color:var(--neon-purple);font-family:'JetBrains Mono',monospace}
+.modal-close{
+  margin-left:auto;width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--glass-2);
+  color:var(--txt);font-size:1.2rem;cursor:pointer;display:grid;place-items:center;transition:all .15s;flex:0 0 auto;
+}
+.modal-close:hover{border-color:var(--neon-red);color:var(--neon-red);box-shadow:var(--glow-magenta)}
+.modal-toc{display:flex;gap:7px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--border);background:rgba(0,229,255,.03)}
+.modal-toc a{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--txt-dim);border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;transition:all .15s}
+.modal-toc a:hover{color:var(--neon-cyan);border-color:var(--neon-cyan)}
+.modal-body{padding:8px 22px 26px}
+.msec{padding:18px 0;border-bottom:1px solid rgba(255,255,255,.05);scroll-margin-top:140px}
+.msec:last-child{border-bottom:none}
+.msec h3{font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:1px;color:var(--neon-cyan);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:9px}
+.msec h3 .num{width:22px;height:22px;border-radius:6px;background:rgba(0,229,255,.12);border:1px solid var(--border);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--neon-cyan)}
+.msec p,.msec li{font-size:.88rem;color:var(--txt);line-height:1.55}
+.msec ul{margin:6px 0 0 4px;list-style:none}
+.msec ul li{padding:4px 0 4px 20px;position:relative}
+.msec ul li::before{content:"▸";position:absolute;left:2px;color:var(--neon-magenta)}
+.msec.na{opacity:.6}
+.msec.na p{font-style:italic;color:var(--txt-faint)}
+
+/* footer */
+footer.ucs-foot{
+  margin-top:50px;border-top:1px solid var(--border);
+  background:linear-gradient(180deg,transparent,rgba(8,11,22,.7));
+  padding:30px 26px 40px;
+}
+.foot-inner{max-width:1880px;margin:0 auto;display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.foot-brand{display:flex;align-items:center;gap:13px}
+.foot-brand .fb-badge{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#0c1122,#15203f);border:1px solid var(--neon-cyan);box-shadow:var(--glow-cyan);display:grid;place-items:center}
+.foot-brand h3{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--txt-bright);letter-spacing:1px}
+.foot-brand .est{font-size:.7rem;color:var(--txt-dim);font-family:'JetBrains Mono',monospace}
+.foot-spacer{flex:1 1 200px}
+.foot-contact{font-size:.8rem;color:var(--txt-dim);line-height:1.7;font-family:'JetBrains Mono',monospace}
+.foot-contact b{color:var(--txt)}
+.foot-disc{flex:1 1 100%;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05);font-size:.72rem;color:var(--txt-faint);line-height:1.5}
+
+.legend-inline{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+.legend-inline span{display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--txt-dim)}
+.legend-inline i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="topband">
+  <div class="topband-inner">
+    <div class="brand-badge">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z" stroke="#00e5ff" stroke-width="1.5" fill="rgba(0,229,255,.08)"/><path d="M9 12l2 2 4-4" stroke="#39ff14" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="brand-text">
+      <h1>AGENTIC ZERO-TRUST SOC</h1>
+      <div class="sub">Sentinel · Foundry · Copilot Security · Purview · Entra</div>
+    </div>
+    <div class="topband-spacer"></div>
+    <div class="live-cluster">
+      <span class="ver-chip">v2</span>
+      <div class="range-pill">
+        <span style="color:var(--txt-dim)">RANGE</span>
+        <select id="rangeSel" onchange="UCS.reRange()">
+          <option>Last 24 hours</option><option>Last 7 days</option><option>Last 30 days</option>
+        </select>
+      </div>
+      <span class="range-pill" style="gap:7px"><span class="dot-live"></span><span style="color:var(--neon-lime)">LIVE</span></span>
+      <span class="clock" id="clock">--:--:--</span>
+    </div>
+  </div>
+</header>
+
+<button class="nav-toggle" aria-label="Toggle navigation" onclick="UCS.toggleNav()">☰</button>
+
+<div class="shell">
+  <!-- ============ SIDE NAV ============ -->
+  <nav class="sidenav" id="sidenav">
+    <div class="nav-group">
+      <div class="nav-group-head">Operations</div>
+      <div class="nav-link active" data-target="overview"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>SOC Overview</div>
+      <div class="nav-link" data-target="identity"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.6"/></svg>Identity & Access</div>
+      <div class="nav-link" data-target="threat"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z" stroke="currentColor" stroke-width="1.6"/></svg>Threat Intelligence</div>
+      <div class="nav-link" data-target="cloud"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 010-8 5 5 0 019.6-1.5A3.5 3.5 0 0117 18H7z" stroke="currentColor" stroke-width="1.6"/></svg>Cloud & API Defense</div>
+      <div class="nav-link" data-target="compliance"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16l-7-3-7 3V4z" stroke="currentColor" stroke-width="1.6"/><path d="M9 10l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Compliance Posture</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-head">Autonomous Layer</div>
+      <div class="nav-link" data-target="agents"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="7" width="14" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="12" r="1.3" fill="currentColor"/><circle cx="15" cy="12" r="1.3" fill="currentColor"/><path d="M12 3v4M8 18v3M16 18v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Agent Fleet</div>
+      <div class="nav-link" data-target="foundry"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><path d="M4 7l8-4 8 4-8 4-8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 12l8 4 8-4M4 17l8 4 8-4" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>Foundry Orchestration</div>
+      <div class="nav-link" data-target="zerotrust"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Zero-Trust Mesh</div>
+      <div class="nav-link" data-target="autodeploy"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><path d="M12 2v14M6 10l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Auto-Deploy Engine</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-head">Product</div>
+      <div class="nav-link" data-target="plugin"><svg class="nav-ico" viewBox="0 0 24 24" fill="none"><path d="M9 3v4M15 3v4M5 7h14v5a7 7 0 01-14 0V7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 19v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Plugin & SaaS</div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main class="content">
+
+    <!-- ===== ZONE 1: SOC OVERVIEW ===== -->
+    <section class="zone" id="overview">
+      <div class="zone-head"><span class="bar"></span><h2>SENTINEL SOC OVERVIEW</h2><span class="tag" id="rangeTag">LAST 24 HOURS</span></div>
+      <p class="zone-sub">Your first screen of the day answers <mark>"what happened overnight?"</mark> in 30 seconds — overnight incident summary, high-severity alerts, threat trends, analyst workload, and compliance posture. Every tile is a live KQL surface; click any tile to drill into the 9-dimension intelligence view.</p>
+
+      <!-- KPI ROW -->
+      <div class="grid g-kpi" style="margin-bottom:16px">
+        <div class="card clickable" data-modal="kpi-incidents">
+          <h3>Total Incidents</h3><div class="card-by">SecurityIncident</div>
+          <div class="kpi-val" data-count="42">0</div>
+          <div class="kpi-trend"><span class="down">▼ 12%</span><span class="vs">vs prev 24h</span></div>
+          <div class="spark-wrap"><canvas class="kpi-spark" id="sp1"></canvas></div><div class="card-corner">TILE-01</div>
+        </div>
+        <div class="card clickable" data-modal="kpi-highsev">
+          <h3>High Severity</h3><div class="card-by">Severity == High</div>
+          <div class="kpi-val red" data-count="7">0</div>
+          <div class="kpi-trend"><span class="up">▲ 16%</span><span class="vs">vs prev 24h</span></div>
+          <div class="spark-wrap"><canvas class="kpi-spark" id="sp2"></canvas></div><div class="card-corner">TILE-02</div>
+        </div>
+        <div class="card clickable" data-modal="kpi-mttt">
+          <h3>Mean Time To Triage</h3><div class="card-by">SOC process</div>
+          <div class="kpi-val green" data-count="18" data-suffix="m">0</div>
+          <div class="kpi-trend"><span class="down">▼ 15%</span><span class="vs">vs prev 24h</span></div>
+          <div class="spark-wrap"><canvas class="kpi-spark" id="sp3"></canvas></div><div class="card-corner">TILE-03</div>
+        </div>
+        <div class="card clickable" data-modal="kpi-mttc">
+          <h3>Mean Time To Close</h3><div class="card-by">SOC process</div>
+          <div class="kpi-val green"><span data-count="5">0</span>h <span data-count="42">0</span>m</div>
+          <div class="kpi-trend"><span class="down">▼ 8%</span><span class="vs">vs prev 24h</span></div>
+          <div class="spark-wrap"><canvas class="kpi-spark" id="sp4"></canvas></div><div class="card-corner">TILE-04</div>
+        </div>
+        <div class="card clickable" data-modal="kpi-analysts">
+          <h3>Active Analysts</h3><div class="card-by">+ autonomous agents</div>
+          <div class="kpi-val" data-count="14">0</div>
+          <div class="kpi-trend"><span class="pill run"><span class="pdot"></span>9 AGENTS LIVE</span></div>
+          <div class="spark-wrap"><canvas class="kpi-spark" id="sp5"></canvas></div><div class="card-corner">TILE-05</div>
+        </div>
+      </div>
+
+      <!-- ROW 2: sign-in volume / MFA / risky sign-ins / PIM -->
+      <div class="grid g-4" style="margin-bottom:16px">
+        <div class="card clickable" data-modal="signin">
+          <h3>Sign-In Volume</h3><div class="card-by">By result · SigninLogs</div>
+          <div class="chart-wrap"><canvas id="c_signin"></canvas></div><div class="card-corner">SigninLogs</div>
+        </div>
+        <div class="card clickable" data-modal="mfa">
+          <h3>MFA Success Rate</h3><div class="card-by">AuthenticationDetails</div>
+          <div class="donut-host"><canvas id="c_mfa"></canvas><div class="donut-center"><div class="big" style="color:var(--neon-lime)">96.3%</div><div class="lab">Success</div></div></div>
+          <div class="card-corner">MFA</div>
+        </div>
+        <div class="card clickable" data-modal="risky">
+          <h3>Risky Sign-Ins</h3><div class="card-by">Over time · AADRiskyUsers</div>
+          <div class="chart-wrap"><canvas id="c_risky"></canvas></div><div class="card-corner">RISK</div>
+        </div>
+        <div class="card clickable" data-modal="pim">
+          <h3>PIM Activations</h3><div class="card-by">By activation type</div>
+          <div class="donut-host"><canvas id="c_pim"></canvas><div class="donut-center"><div class="big">128</div><div class="lab">Total</div></div></div>
+          <div class="card-corner">PIM</div>
+        </div>
+      </div>
+
+      <!-- ROW 3: incidents by sev / analyst workload / threat intel hit / top threat actors -->
+      <div class="grid g-4" style="margin-bottom:16px">
+        <div class="card clickable" data-modal="sevtime">
+          <h3>Incidents By Severity</h3><div class="card-by">Over time (stacked)</div>
+          <div class="chart-wrap"><canvas id="c_sev"></canvas></div>
+          <div class="legend-inline"><span><i style="background:var(--neon-red)"></i>High</span><span><i style="background:var(--neon-amber)"></i>Medium</span><span><i style="background:var(--neon-cyan)"></i>Low</span></div>
+          <div class="card-corner">SEV</div>
+        </div>
+        <div class="card clickable" data-modal="workload">
+          <h3>Analyst Workload</h3><div class="card-by">Open incidents by owner</div>
+          <div id="workload-rows" style="margin-top:8px"></div><div class="card-corner">QUEUE</div>
+        </div>
+        <div class="card clickable" data-modal="tihit">
+          <h3>Threat Intel Hit Rate</h3><div class="card-by">Over time · ThreatIntelligenceIndicator</div>
+          <div class="chart-wrap"><canvas id="c_tihit"></canvas></div><div class="card-corner">TI</div>
+        </div>
+        <div class="card clickable" data-modal="actors">
+          <h3>Top Threat Actors</h3><div class="card-by">By alerts</div>
+          <div id="actor-rows" style="margin-top:8px"></div><div class="card-corner">APT</div>
+        </div>
+      </div>
+
+      <!-- ROW 4: azure resource / subscription perms / compliance score / failing controls -->
+      <div class="grid g-4" style="margin-bottom:18px">
+        <div class="card clickable" data-modal="azresource">
+          <h3>Azure Resource Creation</h3><div class="card-by">Over time · AzureActivity</div>
+          <div class="chart-wrap"><canvas id="c_azres"></canvas></div><div class="card-corner">ARM</div>
+        </div>
+        <div class="card clickable" data-modal="subperm">
+          <h3>Subscription Permission Changes</h3><div class="card-by">Over time · RoleAssignments</div>
+          <div class="chart-wrap"><canvas id="c_perm"></canvas></div><div class="card-corner">RBAC</div>
+        </div>
+        <div class="card clickable" data-modal="compscore">
+          <h3>Compliance Score</h3><div class="card-by">By framework · Defender for Cloud</div>
+          <div style="margin-top:10px">
+            <div class="comp-row"><div class="lbl"><b>NIST 800-53</b><span class="pct">85%</span></div><div class="bar-track"><div class="bar-fill" style="width:85%;background:linear-gradient(90deg,var(--neon-lime),#2ecc40)"></div></div></div>
+            <div class="comp-row"><div class="lbl"><b>CIS v8</b><span class="pct">78%</span></div><div class="bar-track"><div class="bar-fill" style="width:78%;background:linear-gradient(90deg,var(--neon-lime),#2ecc40)"></div></div></div>
+            <div class="comp-row"><div class="lbl"><b>ISO 27001</b><span class="pct">72%</span></div><div class="bar-track"><div class="bar-fill" style="width:72%;background:linear-gradient(90deg,var(--neon-amber),var(--neon-lime))"></div></div></div>
+            <div class="comp-row"><div class="lbl"><b>Azure CIS 1.4</b><span class="pct" style="color:var(--neon-amber)">65%</span></div><div class="bar-track"><div class="bar-fill" style="width:65%;background:linear-gradient(90deg,var(--neon-amber),#f39c12)"></div></div></div>
+          </div><div class="card-corner">CSPM</div>
+        </div>
+        <div class="card clickable" data-modal="failctl">
+          <h3>Failing Controls</h3><div class="card-by">By framework</div>
+          <div id="failctl-rows" style="margin-top:10px"></div><div class="card-corner">GAPS</div>
+        </div>
+      </div>
+
+      <!-- MORNING DASHBOARD STRIP -->
+      <div class="card" style="padding:20px">
+        <h3 style="font-size:.84rem;color:var(--neon-cyan);margin-bottom:14px">WHAT'S ON YOUR SOC MORNING DASHBOARD?</h3>
+        <div class="morning">
+          <div class="morn-item"><div class="mi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z" stroke="#00e5ff" stroke-width="1.6"/></svg></div><div><h4>Overnight Incidents</h4><p>What happened while we were away?</p></div></div>
+          <div class="morn-item"><div class="mi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="#00e5ff" stroke-width="1.6"/><circle cx="16" cy="9" r="2.4" stroke="#00e5ff" stroke-width="1.6"/></svg></div><div><h4>High-Severity Alerts</h4><p>What needs immediate attention?</p></div></div>
+          <div class="morn-item"><div class="mi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#00e5ff" stroke-width="1.6"/><path d="M12 7v5l3 2" stroke="#00e5ff" stroke-width="1.6" stroke-linecap="round"/></svg></div><div><h4>Threat Trends</h4><p>What's trending in our environment?</p></div></div>
+          <div class="morn-item"><div class="mi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="4" y="11" width="3" height="8" stroke="#00e5ff" stroke-width="1.6"/><rect x="10" y="6" width="3" height="13" stroke="#00e5ff" stroke-width="1.6"/><rect x="16" y="9" width="3" height="10" stroke="#00e5ff" stroke-width="1.6"/></svg></div><div><h4>Analyst Workload</h4><p>Do we have the right coverage?</p></div></div>
+          <div class="morn-item"><div class="mi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16l-7-3-7 3V4z" stroke="#00e5ff" stroke-width="1.6"/></svg></div><div><h4>Compliance Posture</h4><p>Are we moving in the right direction?</p></div></div>
+        </div>
+        <div style="margin-top:16px;padding:13px 15px;border-radius:10px;background:rgba(255,176,32,.07);border:1px solid rgba(255,176,32,.25);display:flex;gap:12px;align-items:center">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="flex:0 0 auto"><path d="M12 2l2.5 7.5H22l-6 4.5 2.3 7.5L12 17l-6.3 4.5L8 14 2 9.5h7.5L12 2z" stroke="#ffb020" stroke-width="1.4" fill="rgba(255,176,32,.1)"/></svg>
+          <p style="font-size:.84rem;color:var(--txt)"><b style="color:var(--neon-amber);font-family:'Orbitron',sans-serif">THE METRIC MOST WORKBOOKS MISS:</b> false-positive rate per analytics rule. Tracked weekly — any rule above <mark>15% FP</mark> needs tuning; it is eroding analyst trust in your detection system. The <b>Detection-Tuning Agent</b> watches this continuously and opens auto-PRs against the rule repo.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ZONE 2: IDENTITY & ACCESS ===== -->
+    <section class="zone" id="identity">
+      <div class="zone-head"><span class="bar"></span><h2>IDENTITY & ACCESS OVERVIEW</h2><span class="tag">ENTRA ID · PIM · CAE</span></div>
+      <p class="zone-sub">Sign-in volume, MFA success/failure, risky-sign-in trends, and PIM activation history — built from <mark>SigninLogs + AuditLogs + AADRiskyUsers</mark>. The Identity Sentinel Agent enforces Continuous Access Evaluation (CAE) and revokes sessions in near-real-time on risk escalation.</p>
+      <div class="grid g-3">
+        <div class="card"><h3>Conditional Access Coverage</h3><div class="card-by">Entra ID policy state</div>
+          <div class="donut-host" style="height:180px"><canvas id="c_ca"></canvas><div class="donut-center"><div class="big" style="font-size:1.4rem">94%</div><div class="lab">Users Covered</div></div></div></div>
+        <div class="card"><h3>Risk-Based Revocations (24h)</h3><div class="card-by">CAE auto-action</div>
+          <div class="kpi-val" style="font-size:2rem" data-count="23">0</div>
+          <div class="agent-meta"><span class="metric-chip">Auto: <b>21</b></span><span class="metric-chip">Manual: <b>2</b></span><span class="metric-chip">Mean: <b>1.4s</b></span></div>
+          <div class="chart-wrap short" style="margin-top:14px"><canvas id="c_revoke"></canvas></div></div>
+        <div class="card"><h3>Privileged Standing Access</h3><div class="card-by">Zero-standing-privilege target</div>
+          <div style="margin-top:6px">
+            <div class="comp-row"><div class="lbl"><b>Eligible (JIT)</b><span class="pct">86%</span></div><div class="bar-track"><div class="bar-fill" style="width:86%;background:linear-gradient(90deg,var(--neon-lime),#2ecc40)"></div></div></div>
+            <div class="comp-row"><div class="lbl"><b>Active (standing)</b><span class="pct" style="color:var(--neon-amber)">14%</span></div><div class="bar-track"><div class="bar-fill" style="width:14%;background:linear-gradient(90deg,var(--neon-amber),var(--neon-red))"></div></div></div>
+          </div>
+          <p style="font-size:.78rem;color:var(--txt-dim);margin-top:12px">Target: <mark>0% standing</mark> by Q3. PIM Agent migrates remaining roles to eligible-only with approval workflows.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== ZONE 3: THREAT INTELLIGENCE ===== -->
+    <section class="zone" id="threat">
+      <div class="zone-head"><span class="bar"></span><h2>THREAT INTELLIGENCE DASHBOARD</h2><span class="tag">TI · MDTI · UEBA</span></div>
+      <p class="zone-sub">IOC ingestion rate by source, TI hit-rate per day, and top threat actors active in your tenant — with feed-staleness watch. Copilot for Security drafts the actor profile and recommended containment the moment a high-confidence match lands.</p>
+      <div class="grid g-2">
+        <div class="card"><h3>IOC Ingestion By Source</h3><div class="card-by">ThreatIntelligenceIndicator</div>
+          <div class="chart-wrap tall"><canvas id="c_ioc"></canvas></div></div>
+        <div class="card"><h3>Feed Freshness & Coverage</h3><div class="card-by">Staleness monitor</div>
+          <div id="feed-rows" style="margin-top:8px"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== ZONE 4: CLOUD & API DEFENSE (image 2) ===== -->
+    <section class="zone" id="cloud">
+      <div class="zone-head"><span class="bar"></span><h2>CLOUD &amp; API DEFENSE</h2><span class="tag">DEFENDER FOR APIs · CSPM</span></div>
+      <p class="zone-sub">Essential API security for cloud-native apps — continuous discovery &amp; posture on the left, critical threat detection on the right. Every capability below is wired to an autonomous responder; click a tile for the full 9-dimension breakdown.</p>
+      <div class="grid g-2" style="gap:20px;margin-top:4px" id="api-cols">
+        <div>
+          <h3 style="font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:1px;color:var(--neon-cyan);margin-bottom:12px;text-align:center">CONTINUOUS DISCOVERY &amp; POSTURE</h3>
+          <div class="grid g-2">
+            <div class="card clickable" data-modal="api-zombie"><h3 style="color:var(--neon-cyan)">👻 Zombie APIs</h3><p style="font-size:.8rem;color:var(--txt-dim);margin-top:6px">Uncover deprecated endpoints still receiving traffic.</p><span class="pill warn" style="margin-top:10px"><span class="pdot"></span>4 FOUND</span></div>
+            <div class="card clickable" data-modal="api-unauth"><h3 style="color:var(--neon-cyan)">🔓 Unauthenticated</h3><p style="font-size:.8rem;color:var(--txt-dim);margin-top:6px">Expose internet-facing APIs lacking authentication.</p><span class="pill crit" style="margin-top:10px"><span class="pdot"></span>2 CRITICAL</span></div>
+            <div class="card clickable" data-modal="api-pii"><h3 style="color:var(--neon-cyan)">🔑 Sensitive Data</h3><p style="font-size:.8rem;color:var(--txt-dim);margin-top:6px">Detect PII &amp; credentials in query strings.</p><span class="pill warn" style="margin-top:10px"><span class="pdot"></span>PURVIEW LINK</span></div>
+            <div class="card clickable" data-modal="api-rate"><h3 style="color:var(--neon-cyan)">⏱ No Rate Limit</h3><p style="font-size:.8rem;color:var(--txt-dim);margin-top:6px">Endpoints vulnerable to brute-force &amp; scraping.</p><span class="pill ok" style="margin-top:10px"><span class="pdot"></span>APIM ENFORCED</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-family:'Orbitron',sans-serif;font-size:.82rem;letter-spacing:1px;color:var(--neon-magenta);margin-bottom:12px;text-align:center">CRITICAL THREAT DETECTION</h3>
+          <div class="grid g-2">
+            <div class="card clickable" data-modal="api-enum"><h3 style="color:var(--neon-magenta)">🗝 Suspicious Enum</h3><p style="font-size:.8rem;color:var(--txt-dim);margin-top:6px">Automated discovery of API surface.</p><span class="pill run" style="margin-top:10px"><span class="pdot"></span>MONITORING</span></div>
+            <div class="card clickable" data-modal="api-authanom"><h3 style="color:var(--neon-magenta)">🌐 Auth Anomalies</h3><p style="font-size:.8rem;color:var(--txt-dim);margin-top:6px">Successful logins from unseen IPs / high volume.</p><span class="pill warn" style="margin-top:10px"><span class="pdot"></span>3 FLAGGED</span></div>
+            <div class="card clickable" data-modal="api-exfil"><h3 style="color:var(--neon-magenta)">📂 Data Exfiltration</h3><p style="font-size:.8rem;color:var(--txt-dim);margin-top:6px">Response payloads significantly above baseline.</p><span class="pill crit" style="margin-top:10px"><span class="pdot"></span>1 ACTIVE</span></div>
+            <div class="card clickable" data-modal="api-credstuff"><h3 style="color:var(--neon-magenta)">🔐 Credential Stuffing</h3><p style="font-size:.8rem;color:var(--txt-dim);margin-top:6px">High-volume 401/403 against auth endpoints.</p><span class="pill run" style="margin-top:10px"><span class="pdot"></span>AUTO-BLOCK</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;text-align:center;padding:14px">
+        <p style="font-size:.84rem;color:var(--txt-dim)">Enhanced Security Score &amp; Compliance · <b style="color:var(--neon-cyan)">Defender for APIs</b> feeds the same Sentinel workspace; detections fan out to the agent fleet for autonomous containment.</p>
+      </div>
+    </section>
+
+    <!-- ===== ZONE 5: COMPLIANCE POSTURE ===== -->
+    <section class="zone" id="compliance">
+      <div class="zone-head"><span class="bar"></span><h2>COMPLIANCE POSTURE</h2><span class="tag">PURVIEW · DEFENDER FOR CLOUD</span></div>
+      <p class="zone-sub">Regulatory compliance scores over time and failing controls by framework. Purview drives data-governance and DLP signals; the Compliance Agent maps each failing control to a remediation runbook and tracks drift.</p>
+      <div class="grid g-2">
+        <div class="card"><h3>Compliance Score Trend</h3><div class="card-by">8-week rolling · by framework</div>
+          <div class="chart-wrap tall"><canvas id="c_comptrend"></canvas></div>
+          <div class="legend-inline"><span><i style="background:var(--neon-lime)"></i>NIST 800-53</span><span><i style="background:var(--neon-cyan)"></i>CIS v8</span><span><i style="background:var(--neon-purple)"></i>ISO 27001</span><span><i style="background:var(--neon-amber)"></i>Azure CIS</span></div></div>
+        <div class="card"><h3>Purview Data Governance</h3><div class="card-by">Sensitive data map</div>
+          <div class="grid g-2" style="gap:12px;margin-top:6px">
+            <div style="text-align:center;padding:14px;border-radius:10px;background:var(--glass-2);border:1px solid var(--border)"><div class="kpi-val" style="font-size:1.7rem" data-count="1247">0</div><div style="font-size:.7rem;color:var(--txt-dim);letter-spacing:.5px;text-transform:uppercase">Classified Stores</div></div>
+            <div style="text-align:center;padding:14px;border-radius:10px;background:var(--glass-2);border:1px solid var(--border)"><div class="kpi-val red" style="font-size:1.7rem" data-count="38">0</div><div style="font-size:.7rem;color:var(--txt-dim);letter-spacing:.5px;text-transform:uppercase">DLP Violations 24h</div></div>
+            <div style="text-align:center;padding:14px;border-radius:10px;background:var(--glass-2);border:1px solid var(--border)"><div class="kpi-val green" style="font-size:1.7rem" data-count="92" data-suffix="%">0</div><div style="font-size:.7rem;color:var(--txt-dim);letter-spacing:.5px;text-transform:uppercase">Labeled Coverage</div></div>
+            <div style="text-align:center;padding:14px;border-radius:10px;background:var(--glass-2);border:1px solid var(--border)"><div class="kpi-val" style="font-size:1.7rem" data-count="6">0</div><div style="font-size:.7rem;color:var(--txt-dim);letter-spacing:.5px;text-transform:uppercase">Frameworks Mapped</div></div>
+          </div>
+          <p style="font-size:.78rem;color:var(--txt-dim);margin-top:14px">Insider Risk + Communication Compliance signals stream into Sentinel as a unified data-risk overlay.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== ZONE 6: AGENT FLEET ===== -->
+    <section class="zone" id="agents">
+      <div class="zone-head"><span class="bar"></span><h2>AUTONOMOUS AGENT FLEET</h2><span class="tag">9 AGENTS · M365 + FOUNDRY</span></div>
+      <p class="zone-sub">A fleet of purpose-built security agents orchestrated through <mark>Microsoft Foundry</mark>, grounded by <mark>Copilot for Security</mark>, and wired into Sentinel, Purview, Entra ID, and Defender. Each agent runs least-privilege, is itself a zero-trust principal, and every action is logged to an immutable audit ledger. Click an agent for its full operating spec.</p>
+      <div class="grid g-3" id="agent-grid"></div>
+    </section>
+
+    <!-- ===== ZONE 7: FOUNDRY ORCHESTRATION ===== -->
+    <section class="zone" id="foundry">
+      <div class="zone-head"><span class="bar"></span><h2>FOUNDRY ORCHESTRATION PLANE</h2><span class="tag">AGENT SERVICE · MCP · GROUNDING</span></div>
+      <p class="zone-sub">Microsoft Foundry Agent Service is the control plane: it hosts the agents, manages their tools via the Model Context Protocol, grounds responses against your tenant's knowledge, and enforces content + identity guardrails. Copilot for Security supplies the security-domain reasoning skills.</p>
+      <div class="card" style="margin-bottom:16px">
+        <h3 style="color:var(--neon-cyan);margin-bottom:14px">DETECTION → DECISION → ACTION PIPELINE</h3>
+        <div class="flowstrip">
+          <div class="flow-node"><div class="fn-step">STAGE 01</div><h4>Signal Ingest</h4><p>Sentinel, Defender, Purview, Entra emit events to the unified workspace.</p></div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node"><div class="fn-step">STAGE 02</div><h4>Triage Agent</h4><p>Foundry agent correlates, dedups, and scores via Copilot reasoning.</p></div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node"><div class="fn-step">STAGE 03</div><h4>Policy Gate</h4><p>Zero-trust guardrail checks blast-radius &amp; approval requirements.</p></div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node"><div class="fn-step">STAGE 04</div><h4>Action Agent</h4><p>Executes Logic App / PowerShell / Bicep runbook with scoped token.</p></div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node"><div class="fn-step">STAGE 05</div><h4>Verify &amp; Learn</h4><p>Confirms remediation, writes audit ledger, tunes detection.</p></div>
+        </div>
+      </div>
+      <div class="grid g-2">
+        <div class="card"><h3>Agent Health & Throughput (24h)</h3><div class="card-by">Foundry telemetry</div>
+          <div class="chart-wrap tall"><canvas id="c_agenthealth"></canvas></div></div>
+        <div class="card"><h3>Guardrail Enforcement</h3><div class="card-by">Content + identity + blast-radius</div>
+          <div id="guardrail-rows" style="margin-top:8px"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== ZONE 8: ZERO-TRUST MESH (3D) ===== -->
+    <section class="zone" id="zerotrust">
+      <div class="zone-head"><span class="bar"></span><h2>ZERO-TRUST MESH</h2><span class="tag">VERIFY EXPLICITLY · LEAST PRIVILEGE · ASSUME BREACH</span></div>
+      <p class="zone-sub">Every node — human, agent, workload, device — is a verified principal. The mesh below is interactive: drag to rotate, click a node to inspect its trust posture. Nothing is trusted by location; every request is continuously evaluated.</p>
+      <div id="zt-canvas-host">
+        <div class="zt-readout" id="zt-readout"><h5>ZERO-TRUST CORE</h5><p>Click any node to inspect its identity, policy, and continuous-evaluation state.</p></div>
+        <div class="zt-hint">◐ drag to rotate · click a node to inspect</div>
+      </div>
+      <div class="grid g-3" style="margin-top:16px">
+        <div class="card"><h3>Verify Explicitly</h3><p style="font-size:.84rem;color:var(--txt-dim);margin-top:6px">Every auth uses device, user, location, and risk signals. <b style="color:var(--neon-lime)">CAE active</b> across 94% of users.</p></div>
+        <div class="card"><h3>Least Privilege</h3><p style="font-size:.84rem;color:var(--txt-dim);margin-top:6px">JIT/JEA everywhere. Agents hold scoped, time-boxed tokens. <b style="color:var(--neon-amber)">14% standing</b> access remaining.</p></div>
+        <div class="card"><h3>Assume Breach</h3><p style="font-size:.84rem;color:var(--txt-dim);margin-top:6px">Micro-segmentation + continuous telemetry. Mean detection-to-containment <b style="color:var(--neon-cyan)">2.3 min</b> with agents.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== ZONE 9: AUTO-DEPLOY ENGINE ===== -->
+    <section class="zone" id="autodeploy">
+      <div class="zone-head"><span class="bar"></span><h2>AUTO-DEPLOY ENGINE</h2><span class="tag">IaC · POWERSHELL · CI/CD</span></div>
+      <p class="zone-sub">The platform deploys itself. Analytics rules, automation playbooks, agent definitions, and guardrail policies all ship as version-controlled Infrastructure-as-Code, promoted through a gated CI/CD pipeline. Below are representative artifacts the engine emits — illustrative, for review before you run anything in your own tenant.</p>
+
+      <div class="grid g-2">
+        <div>
+          <div class="codebox">
+            <div class="codebox-head"><span class="cdot" style="background:#ff5f57"></span><span class="cdot" style="background:#febc2e"></span><span class="cdot" style="background:#28c840"></span><span class="ctitle">deploy-sentinel-soc.ps1</span><span class="ctag">PowerShell</span></div>
+            <pre><span class="c"># UCS Agentic Zero-Trust SOC — illustrative bootstrap</span>
+<span class="k">param</span>(
+  [<span class="v">string</span>]$ResourceGroup = <span class="s">"rg-soc-prod"</span>,
+  [<span class="v">string</span>]$Workspace     = <span class="s">"law-sentinel-soc"</span>,
+  [<span class="v">string</span>]$Location      = <span class="s">"eastus2"</span>
+)
+
+<span class="c"># 1. Enable Sentinel on the workspace</span>
+<span class="f">New-AzOperationalInsightsWorkspace</span> `
+  -ResourceGroupName $ResourceGroup `
+  -Name $Workspace -Location $Location -Sku <span class="s">"PerGB2018"</span>
+<span class="f">Set-AzSentinel</span> -ResourceGroupName $ResourceGroup `
+  -WorkspaceName $Workspace -Enable
+
+<span class="c"># 2. Connect first-party data connectors</span>
+$connectors = <span class="s">"AzureActiveDirectory"</span>,<span class="s">"MicrosoftThreatProtection"</span>,
+  <span class="s">"Office365"</span>,<span class="s">"AzureActivity"</span>,<span class="s">"MicrosoftPurview"</span>
+<span class="k">foreach</span> ($c <span class="k">in</span> $connectors) {
+  <span class="f">Enable-AzSentinelDataConnector</span> -Workspace $Workspace -Kind $c
+}
+
+<span class="c"># 3. Register the Foundry agent identities (managed)</span>
+<span class="f">Deploy-UcsAgentFleet</span> -Workspace $Workspace `
+  -LeastPrivilege -ZeroStandingAccess
+<span class="f">Write-Host</span> <span class="s">"SOC baseline deployed. Review before enabling auto-action."</span> -Fore Green</pre>
+          </div>
+        </div>
+        <div>
+          <div class="codebox">
+            <div class="codebox-head"><span class="cdot" style="background:#ff5f57"></span><span class="cdot" style="background:#febc2e"></span><span class="cdot" style="background:#28c840"></span><span class="ctitle">isolate-host.playbook.json</span><span class="ctag">Logic App</span></div>
+            <pre><span class="c">// Auto-containment runbook — agent-invoked</span>
+{
+  <span class="v">"trigger"</span>: <span class="s">"Sentinel.Incident.HighSeverity"</span>,
+  <span class="v">"guardrail"</span>: {
+    <span class="v">"requireApproval"</span>: <span class="f">"if blastRadius > tier2"</span>,
+    <span class="v">"maxScope"</span>: <span class="s">"single-host"</span>
+  },
+  <span class="v">"actions"</span>: [
+    { <span class="v">"defender"</span>: <span class="s">"Isolate-Machine"</span> },
+    { <span class="v">"entra"</span>: <span class="s">"Revoke-UserSessions"</span> },
+    { <span class="v">"purview"</span>: <span class="s">"Quarantine-SensitiveLabel"</span> },
+    { <span class="v">"copilot"</span>: <span class="s">"Draft-IncidentSummary"</span> }
+  ],
+  <span class="v">"audit"</span>: <span class="s">"immutable-ledger://soc/actions"</span>
+}</pre>
+          </div>
+          <div class="codebox" style="margin-top:16px">
+            <div class="codebox-head"><span class="cdot" style="background:#ff5f57"></span><span class="cdot" style="background:#febc2e"></span><span class="cdot" style="background:#28c840"></span><span class="ctitle">agent-fleet.bicep</span><span class="ctag">Bicep / IaC</span></div>
+            <pre><span class="k">resource</span> triageAgent <span class="s">'Microsoft.Foundry/agents@2025-preview'</span> = {
+  name: <span class="s">'agent-soc-triage'</span>
+  properties: {
+    model: <span class="s">'foundry-reasoning'</span>
+    grounding: [ <span class="s">'sentinel'</span>, <span class="s">'mdti'</span> ]
+    tools:    [ <span class="s">'kql'</span>, <span class="s">'copilot-security'</span> ]
+    identity: { type: <span class="s">'leastPrivilege'</span> }
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h3 style="color:var(--neon-cyan);margin-bottom:12px">DEPLOYMENT PIPELINE STATUS</h3>
+        <div id="pipeline-rows"></div>
+      </div>
+    </section>
+
+    <!-- ===== ZONE 10: PLUGIN & SAAS ===== -->
+    <section class="zone" id="plugin">
+      <div class="zone-head"><span class="bar"></span><h2>PLUGIN &amp; SaaS DELIVERY</h2><span class="tag">FORWARD-LOOKING PRODUCTIZATION</span></div>
+      <p class="zone-sub">Built so the same engine runs three ways: embedded as a <mark>Sentinel/Copilot plugin</mark> in a customer's own tenant, delivered as a multi-tenant <mark>SaaS</mark> control plane, or shipped as an MSSP white-label. Integrations below extend it into the wider security ecosystem.</p>
+
+      <div class="grid g-3" style="margin-bottom:18px">
+        <div class="tier"><h3>Plugin</h3><div class="price">In-Tenant<small> / BYO-Sentinel</small></div>
+          <p style="font-size:.82rem;color:var(--txt-dim)">Drops into an existing Sentinel + Copilot for Security deployment. Customer keeps full data residency.</p>
+          <ul><li>Native Sentinel content pack</li><li>Copilot for Security plugin manifest</li><li>Foundry agent definitions (Bicep)</li><li>Runs in customer subscription</li><li>Zero data egress</li></ul></div>
+        <div class="tier featured"><div class="badge-feat">FLAGSHIP</div><h3>SaaS</h3><div class="price">Multi-Tenant<small> / managed plane</small></div>
+          <p style="font-size:.82rem;color:var(--txt-dim)">UCS-hosted control plane orchestrating agents across customer tenants via delegated, least-privilege access (Lighthouse).</p>
+          <ul><li>Cross-tenant agent fleet</li><li>Pooled threat intelligence</li><li>Per-tenant isolation &amp; RBAC</li><li>Usage-metered billing</li><li>Continuous model & rule updates</li></ul></div>
+        <div class="tier"><h3>MSSP</h3><div class="price">White-Label<small> / partner</small></div>
+          <p style="font-size:.82rem;color:var(--txt-dim)">Rebrandable for managed security providers running many client SOCs from one pane of glass.</p>
+          <ul><li>Multi-client roll-up dashboard</li><li>Custom branding &amp; theming</li><li>Tiered SLA automation</li><li>Partner API &amp; webhooks</li><li>Chargeback reporting</li></ul></div>
+      </div>
+
+      <h3 style="font-family:'Orbitron',sans-serif;font-size:.84rem;letter-spacing:1px;color:var(--neon-cyan);margin:6px 0 14px">ECOSYSTEM INTEGRATIONS</h3>
+      <div class="plug-grid">
+        <div class="plug"><div class="pi">🛡️</div><h4>Microsoft Sentinel</h4><p>Native SIEM workspace &amp; content pack</p></div>
+        <div class="plug"><div class="pi">🤖</div><h4>Copilot for Security</h4><p>Domain reasoning &amp; promptbooks</p></div>
+        <div class="plug"><div class="pi">🏗️</div><h4>Microsoft Foundry</h4><p>Agent hosting &amp; orchestration</p></div>
+        <div class="plug"><div class="pi">📑</div><h4>Microsoft Purview</h4><p>Data governance &amp; DLP signals</p></div>
+        <div class="plug"><div class="pi">🪪</div><h4>Entra ID</h4><p>Identity, CAE, PIM</p></div>
+        <div class="plug"><div class="pi">🔍</div><h4>Defender XDR</h4><p>Endpoint, API, cloud detection</p></div>
+        <div class="plug"><div class="pi">⚡</div><h4>Logic Apps</h4><p>SOAR playbook execution</p></div>
+        <div class="plug"><div class="pi">🔗</div><h4>MCP Connectors</h4><p>Tool federation for agents</p></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)UCS.closeModal()">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="mh-ico" id="mhIco">⬡</div>
+      <div><h2 id="mhTitle">—</h2><div class="mh-sub" id="mhSub">—</div></div>
+      <button class="modal-close" onclick="UCS.closeModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-toc" id="mhToc"></div>
+    <div class="modal-body" id="mhBody"></div>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="ucs-foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <div class="fb-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z" stroke="#00e5ff" stroke-width="1.5" fill="rgba(0,229,255,.08)"/><path d="M9 12l2 2 4-4" stroke="#39ff14" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><h3>UCS SOLUTIONS</h3><div class="est">Ultimate Computer Solutions, Inc. · est. 1993</div></div>
+    </div>
+    <div class="foot-spacer"></div>
+    <div class="foot-contact">
+      <div><b>Kenneth P. Barnes</b> — Founder, CTO &amp; CISO</div>
+      <div>KBarnes@ucsolutions.com</div>
+      <div>815-713-4151 · 804-356-5505</div>
+      <div>Agentic Zero-Trust SOC Command Center · v2 · June 2026</div>
+    </div>
+    <div class="foot-disc">
+      <b>Illustrative deliverable.</b> Metrics, agents, and code artifacts shown here are representative architecture for design and demonstration purposes. PowerShell, Bicep, and Logic App snippets are starting points to review and adapt in a controlled environment before running against any production tenant — they are not a turnkey auto-execution package. Microsoft, Sentinel, Foundry, Copilot, Purview, Entra ID, and Defender are trademarks of Microsoft Corporation; this independent UCS deliverable is not affiliated with or endorsed by Microsoft. © 2026 Ultimate Computer Solutions, Inc. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   UCS Agentic Zero-Trust SOC — controller
+   ============================================================ */
+const UCS = (function(){
+  const cyan='#00e5ff',mag='#ff2d95',pur='#9d6bff',lime='#39ff14',amber='#ffb020',red='#ff3b5c',blue='#3b82f6';
+  const grid='rgba(0,229,255,.07)',tick='#6f7fa6';
+  const charts=[];
+  Chart.defaults.color=tick;Chart.defaults.font.family="'Rajdhani',sans-serif";Chart.defaults.font.size=11;
+
+  /* ---- helpers ---- */
+  const hrs=Array.from({length:13},(_,i)=>{const h=i*2;return (h===0?'12 AM':h<12?h+' AM':h===12?'12 PM':(h-12)+' PM');});
+  const rnd=(a,b)=>Math.round(a+Math.random()*(b-a));
+  const series=(n,a,b)=>Array.from({length:n},()=>rnd(a,b));
+  function gridOpt(stack){return {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:grid},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:7}},
+            y:{grid:{color:grid},stacked:!!stack,beginAtZero:true}}, ...(stack?{scales:{x:{stacked:true,grid:{color:grid}},y:{stacked:true,grid:{color:grid}}}}:{})};}
+
+  /* ---- count-up ---- */
+  function countUp(el){
+    const tgt=parseFloat(el.dataset.count),suf=el.dataset.suffix||'';
+    if(isNaN(tgt)){return;}
+    let cur=0,dur=1100,t0=null;
+    function step(t){if(!t0)t0=t;const p=Math.min((t-t0)/dur,1);const e=1-Math.pow(1-p,3);
+      el.textContent=(Math.round(tgt*e*10)/10)+suf;if(p<1)requestAnimationFrame(step);else el.textContent=tgt+suf;}
+    requestAnimationFrame(step);
+  }
+
+  /* ---- sparkline ---- */
+  function spark(id,color){
+    const el=document.getElementById(id);if(!el)return;
+    charts.push(new Chart(el,{type:'line',data:{labels:series(16,0,1),datasets:[{data:series(16,20,80),borderColor:color,borderWidth:2,fill:true,
+      backgroundColor:(c)=>{const g=c.chart.ctx.createLinearGradient(0,0,0,40);g.addColorStop(0,color+'55');g.addColorStop(1,color+'00');return g;},
+      tension:.4,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}}));
+  }
+
+  /* ============ DATA ROWS ============ */
+  const workload=[['Alice',12,red],['Bob',9,amber],['Charlie',7,amber],['Diana',5,cyan],['Ethan',3,cyan],['Agent-Triage',31,pur]];
+  const actors=[['APT28',23,red,'GRU'],['Lazarus Group',17,mag,'DPRK'],['Fancy Bear',14,amber,'GRU'],['FIN7',9,amber,'eCrime'],['UNC2452',6,cyan,'SVR']];
+  const failctl=[['NIST 800-53',12,red],['CIS v8',18,red],['ISO 27001',15,amber],['Azure CIS 1.4',9,amber]];
+  const feeds=[['Microsoft MDTI','OK',lime,'2 min ago'],['AlienVault OTX','OK',lime,'8 min ago'],['Abuse.ch','OK',lime,'15 min ago'],['MISP Community','STALE',amber,'4 h ago'],['Custom TAXII','OK',lime,'1 min ago']];
+  const guardrails=[['Content safety filter',99.7,lime],['Identity scope check',100,lime],['Blast-radius cap',96.2,lime],['Human-approval gate (tier-2+)',88.4,amber],['Prompt-injection shield',97.1,lime]];
+  const pipeline=[['Analytics rules','DEPLOYED','ok','142 rules · last sync 6m'],['Automation playbooks','DEPLOYED','ok','38 playbooks'],['Agent fleet (Foundry)','RUNNING','run','9/9 healthy'],['Guardrail policies','DEPLOYED','ok','enforced'],['Detection tuning PR','PENDING REVIEW','warn','#418 · 3 rules >15% FP']];
+
+  function rankRows(host,rows,withBar){
+    const max=Math.max(...rows.map(r=>r[1]));
+    document.getElementById(host).innerHTML=rows.map(r=>{
+      const bar=withBar?`<div class="bar-track"><div class="bar-fill" style="width:${r[1]/max*100}%;background:${r[2]}"></div></div>`:'';
+      const tag=r[3]?`<span class="rank-ico" style="background:${r[2]}22;color:${r[2]};border:1px solid ${r[2]}55">${r[3].slice(0,3)}</span>`:'';
+      return `<div class="rank-row">${tag}<span class="rank-name">${r[0]}</span>${bar}<span class="rank-val" style="color:${r[2]}">${r[1]}</span></div>`;
+    }).join('');
+  }
+  function feedRows(){
+    document.getElementById('feed-rows').innerHTML=feeds.map(f=>`
+      <div class="rank-row"><span class="rank-name">${f[0]}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--txt-faint)">${f[3]}</span>
+      <span class="pill ${f[2]===lime?'ok':'warn'}"><span class="pdot"></span>${f[1]}</span></div>`).join('');
+  }
+  function guardrailRows(){
+    document.getElementById('guardrail-rows').innerHTML=guardrails.map(g=>`
+      <div class="comp-row"><div class="lbl"><b>${g[0]}</b><span class="pct" style="color:${g[2]}">${g[1]}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${g[1]}%;background:${g[2]}"></div></div></div>`).join('');
+  }
+  function pipelineRows(){
+    document.getElementById('pipeline-rows').innerHTML=pipeline.map(p=>`
+      <div class="rank-row" style="cursor:default"><span class="rank-name">${p[0]}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--txt-faint);flex:1 1 auto">${p[3]}</span>
+      <span class="pill ${p[2]}"><span class="pdot"></span>${p[1]}</span></div>`).join('');
+  }
+
+  /* ============ AGENT FLEET ============ */
+  const agents=[
+    {id:'triage',ico:'🧭',name:'Triage Agent',role:'sentinel · copilot',color:cyan,
+     desc:'Correlates and scores incoming incidents, dedups noise, and routes to the right responder or analyst.',
+     chips:[['Triaged 24h','312'],['Auto-closed','58%'],['Mean','9s']]},
+    {id:'identity',ico:'🪪',name:'Identity Sentinel',role:'entra id · CAE',color:pur,
+     desc:'Watches sign-in risk and enforces Continuous Access Evaluation; revokes sessions on risk escalation.',
+     chips:[['Revocations','23'],['Mean','1.4s'],['Coverage','94%']]},
+    {id:'hunter',ico:'🎯',name:'Threat Hunter',role:'mdti · UEBA',color:mag,
+     desc:'Runs hypothesis-driven hunts against TI, behavioral baselines, and the unified workspace.',
+     chips:[['Hunts/day','46'],['New IOCs','19'],['TTPs','MITRE']]},
+    {id:'container',ico:'🚧',name:'Containment Agent',role:'defender · logic apps',color:red,
+     desc:'Executes scoped isolation, session revocation, and quarantine runbooks behind blast-radius guardrails.',
+     chips:[['Contained','7'],['Mean','2.3m'],['Scope','host']]},
+    {id:'compliance',ico:'📋',name:'Compliance Agent',role:'purview · defender cloud',color:lime,
+     desc:'Maps failing controls to remediation runbooks, tracks drift, and keeps the framework scorecard current.',
+     chips:[['Controls','6 fw'],['Drift','-3'],['DLP','38']]},
+    {id:'tuner',ico:'🎛️',name:'Detection-Tuning Agent',role:'analytics · CI/CD',color:amber,
+     desc:'Monitors false-positive rate per rule and opens auto-PRs against the analytics-rule repo when any exceeds 15%.',
+     chips:[['Rules','142'],['FP>15%','3'],['PRs','#418']]},
+    {id:'apiguard',ico:'🛰️',name:'API Defense Agent',role:'defender for APIs',color:blue,
+     desc:'Surfaces zombie/unauthenticated endpoints, detects enumeration and exfiltration, and triggers APIM throttling.',
+     chips:[['Endpoints','1.2k'],['Zombie','4'],['Exfil','1']]},
+    {id:'soar',ico:'⚙️',name:'SOAR Orchestrator',role:'logic apps · MCP',color:cyan,
+     desc:'The action layer — invokes PowerShell, Bicep, and Logic App playbooks with time-boxed least-privilege tokens.',
+     chips:[['Runbooks','38'],['Exec 24h','94'],['Fail','0']]},
+    {id:'narrator',ico:'📝',name:'Incident Narrator',role:'copilot security',color:pur,
+     desc:'Drafts the executive incident summary, timeline, and recommended next steps grounded in tenant context.',
+     chips:[['Reports','41'],['Mean','12s'],['Lang','NL']]}
+  ];
+  function agentGrid(){
+    document.getElementById('agent-grid').innerHTML=agents.map(a=>`
+      <div class="agent-card" data-agent="${a.id}">
+        <div class="ah"><div class="agent-ico" style="border-color:${a.color}66;box-shadow:0 0 12px ${a.color}44">${a.ico}</div>
+          <div><h3>${a.name}</h3><div class="role" style="color:${a.color}">${a.role}</div></div>
+          <span class="pill run" style="margin-left:auto"><span class="pdot"></span>LIVE</span></div>
+        <div class="agent-desc">${a.desc}</div>
+        <div class="agent-meta">${a.chips.map(c=>`<span class="metric-chip">${c[0]}: <b>${c[1]}</b></span>`).join('')}</div>
+      </div>`).join('');
+    document.querySelectorAll('[data-agent]').forEach(el=>el.onclick=()=>openAgentModal(el.dataset.agent));
+  }
+
+  /* ============ 9-SECTION MODAL CONTENT ============ */
+  const NINE=['What it is','How it works','Where used','Use cases','Examples','Dependencies','Interdependencies','When to use','Future thinking'];
+  // content registry: id -> {title, sub, ico, sections:[9 strings/arrays]}
+  const M={};
+  function reg(id,title,sub,ico,secs){M[id]={title,sub,ico,secs};}
+
+  // ---- KPI modals ----
+  reg('kpi-incidents','Total Incidents','SecurityIncident · 42 in range','⬡',[
+    'The total count of correlated security incidents Sentinel raised in the selected window. An incident bundles related alerts into one investigable unit.',
+    'Sentinel correlation rules and the analytics engine group alerts from Defender, Entra, and custom KQL into incidents. The Triage Agent then scores and dedups them.',
+    'Top-line SOC health metric — the first number an analyst or manager reads at shift start.',
+    ['Shift handoff briefing','Trend tracking week-over-week','Capacity planning for analyst staffing','SLA reporting to leadership'],
+    'A 12% drop vs the prior 24h alongside a stable high-severity count suggests noise reduction from recent rule tuning rather than reduced threat activity.',
+    ['Sentinel workspace with analytics rules enabled','Data connectors streaming alerts','Correlation/grouping configuration'],
+    'Feeds the analyst-workload and MTTT/MTTC tiles; a spike here cascades into queue depth and response-time metrics.',
+    'Read it every morning and after any major rule change. A sudden swing — up or down — is the signal to investigate the detection pipeline itself.',
+    'The Triage Agent increasingly auto-resolves benign incidents, so this number should trend toward "true-signal only" while auto-closed volume rises beneath it.'
+  ]);
+  reg('kpi-highsev','High Severity Incidents','Severity == High · 7','⚠',[
+    'The subset of incidents classified high severity — the ones that warrant immediate human or autonomous attention.',
+    'Severity is assigned by the originating analytics rule and can be re-scored by the Triage Agent using Copilot reasoning over asset criticality and TI context.',
+    'The "what needs attention now" line on the morning dashboard.',
+    ['Immediate triage prioritization','Paging / on-call escalation','Executive alerting','Containment-agent trigger threshold'],
+    'A 16% rise here while total incidents fell is the pattern that matters — fewer but sharper signals, exactly what good tuning produces.',
+    ['Severity mapping in analytics rules','Asset-criticality tagging','Containment playbooks for auto-response'],
+    'Directly drives the Containment Agent and the paging workflow; high-sev incidents short-circuit the normal queue.',
+    'Watch continuously. Any sustained climb is the leading indicator of an active campaign against your tenant.',
+    'Severity will become dynamic and context-aware — the same alert scored differently based on real-time blast-radius and business-impact modeling.'
+  ]);
+  reg('kpi-mttt','Mean Time To Triage','SOC process · 18m','⏱',[
+    'Average elapsed time from incident creation to first meaningful analyst (or agent) action.',
+    'Computed from incident timestamps. The Triage Agent compresses this dramatically by acting in seconds on well-understood patterns.',
+    'A core SOC-efficiency KPI exposing where process bottlenecks live.',
+    ['Process-bottleneck diagnosis','Agent-vs-human performance comparison','SLA conformance','Staffing model validation'],
+    'An 18-minute mean that is falling 15% reflects agents absorbing the routine triage so humans focus on the hard 7.',
+    ['Accurate incident timestamping','Defined triage workflow','Agent automation for first-touch'],
+    'Inversely related to incident volume under fixed capacity; the agent fleet breaks that coupling.',
+    'Track weekly and after staffing or automation changes — it tells you whether the SOC is scaling.',
+    'As agents own first-touch triage, MTTT trends toward sub-minute for the majority, leaving a human MTTT figure reported separately for complex cases.'
+  ]);
+  reg('kpi-mttc','Mean Time To Close','SOC process · 5h 42m','⏱',[
+    'Average time from incident creation to full resolution and closure.',
+    'Measured across the incident lifecycle including investigation, containment, and verification — the Verify-and-Learn pipeline stage closes the loop.',
+    'The end-to-end efficiency metric leadership cares about most.',
+    ['Lifecycle efficiency tracking','Containment-automation ROI','Capacity and burnout monitoring','Board reporting'],
+    'A 5h42m close time trending down 8% shows containment automation shaving the long tail of manual remediation steps.',
+    ['Containment and remediation playbooks','Verification logic','Closure criteria definitions'],
+    'Downstream of MTTT and high-severity load; improvements here usually trace back to playbook coverage.',
+    'Report monthly to leadership and weekly internally; pair it with FP-rate so speed never comes at the cost of correctness.',
+    'Closed-loop autonomous remediation will push routine close times toward minutes, with humans reserved for forensics and lessons-learned.'
+  ]);
+  reg('kpi-analysts','Active Analysts + Agents','Hybrid workforce · 14 + 9','👥',[
+    'The combined human and autonomous workforce currently working the queue — 14 analysts augmented by 9 always-on agents.',
+    'Human presence comes from shift rosters; agent status is live Foundry telemetry. Together they form a hybrid SOC workforce.',
+    'Coverage and capacity view — answers "do we have the right coverage right now?"',
+    ['Shift-coverage validation','Surge planning','Human-in-the-loop ratio tuning','Cost-per-incident modeling'],
+    '14 analysts that previously handled all 42 incidents now supervise 9 agents handling the routine majority, raising effective capacity several-fold.',
+    ['Roster integration','Foundry agent health feed','Role and skill mapping'],
+    'The agent count interlocks with every automation metric on this board — agents are first-class members of the workforce, not background jobs.',
+    'Monitor continuously; the human-to-agent ratio is itself a tunable lever for cost and resilience.',
+    'The trend is toward humans as supervisors and exception-handlers, with agent headcount scaling elastically to incident load.'
+  ]);
+
+  // ---- chart tiles ----
+  reg('signin','Sign-In Volume','SigninLogs · success vs failure','📊',[
+    'Hourly authentication volume split by success and failure across the tenant.',
+    'Sourced from Entra ID SigninLogs. Failure spikes are cross-referenced against risky-sign-in and credential-stuffing detections.',
+    'Identity baseline view — establishes what normal looks like so anomalies stand out.',
+    ['Brute-force / password-spray detection','Capacity baselining','MFA-rollout impact analysis','Outage correlation'],
+    'A failure spike at 2 AM with no matching legitimate-traffic rise is the classic password-spray fingerprint the Identity Sentinel flags.',
+    ['Entra ID logs streaming to Sentinel','SigninLogs connector enabled'],
+    'Pairs with MFA success rate and risky sign-ins; together they form the identity triad.',
+    'Glance daily; investigate any failure pattern that breaks from the established baseline shape.',
+    'Behavioral baselining per-user and per-app will replace static thresholds, letting the agent flag "unusual for this identity" precisely.'
+  ]);
+  reg('mfa','MFA Success Rate','AuthenticationDetails · 96.3%','🔐',[
+    'Share of MFA challenges completed successfully — a health and friction indicator for strong auth.',
+    'Computed from authentication detail logs. A falling rate can mean attacker pressure (MFA fatigue) or genuine user friction.',
+    'Strong-authentication health metric.',
+    ['MFA-fatigue attack detection','User-experience monitoring','Method-migration tracking (SMS → passkey)','Help-desk load prediction'],
+    'A dip toward 90% concentrated on push approvals can indicate an MFA-fatigue campaign — number-matching and the Identity Sentinel counter it.',
+    ['MFA enforced via Conditional Access','Authentication method registration'],
+    'Interlocks with sign-in volume and risky sign-ins; a coordinated shift across all three is high-signal.',
+    'Track weekly; any sustained drop below ~95% deserves a look at both threat and UX angles.',
+    'Phishing-resistant methods (passkeys, certificate-based) will push this toward 99%+, and the metric shifts to measuring method strength, not just success.'
+  ]);
+  reg('risky','Risky Sign-Ins','AADRiskyUsers · over time','🚨',[
+    'Count of sign-ins Entra ID Identity Protection scored as risky, trended over the window.',
+    'Identity Protection applies ML risk detections (impossible travel, anonymous IP, leaked credentials). The Identity Sentinel acts on escalations via CAE.',
+    'The leading identity-compromise indicator.',
+    ['Account-takeover early warning','Conditional Access tuning','Leaked-credential response','Impossible-travel investigation'],
+    'A climbing risky-sign-in line for a privileged user triggers automatic session revocation and a step-up challenge within seconds.',
+    ['Entra ID P2 / Identity Protection','Risk policies configured','AADRiskyUsers connector'],
+    'Feeds directly into CAE revocations and the privileged-access posture metrics.',
+    'Monitor continuously for privileged identities; a single high-risk event on an admin warrants immediate action.',
+    'Risk scoring will fuse endpoint, network, and data-access signals into a single continuously-recomputed identity-trust score.'
+  ]);
+  reg('pim','PIM Activations','By activation type · 128','🗝',[
+    'Privileged Identity Management role activations in the window, broken down by user, role, and group scope.',
+    'Each activation is a just-in-time elevation request, ideally time-boxed and approval-gated. The PIM Agent migrates standing roles to eligible-only.',
+    'Privileged-access governance view.',
+    ['Standing-access reduction','Activation-anomaly detection','Approval-workflow auditing','Compliance evidence (least privilege)'],
+    'An off-hours Global Admin activation with no change ticket is exactly the anomaly the governance workflow surfaces for review.',
+    ['Entra ID PIM configured','Eligible role assignments','Approval workflows'],
+    'Tightly coupled to privileged-standing-access and risky-sign-in metrics.',
+    'Review activation patterns weekly; investigate any elevation that lacks a business justification.',
+    'The endpoint is zero standing privilege — every elevation just-in-time, just-enough, and auto-revoked, with anomaly detection on the activation graph itself.'
+  ]);
+  reg('sevtime','Incidents By Severity','Stacked over time','📈',[
+    'Stacked hourly view of incidents by High / Medium / Low severity, showing how the mix shifts through the day.',
+    'Built from SecurityIncident severity fields. Shape over time reveals campaign timing and shift-load distribution.',
+    'Severity-distribution and workload-shape view.',
+    ['Shift-load balancing','Campaign-timing analysis','Rule-noise diagnosis','Severity-drift detection'],
+    'A growing high-severity band concentrated in a few hours points to a focused campaign rather than steady background noise.',
+    ['Severity mapping','Time-series incident data'],
+    'The high band drives the high-severity KPI and containment load; the low band reflects rule noise the tuner targets.',
+    'Review at shift boundaries to right-size coverage for the hours that actually run hot.',
+    'Predictive severity-load forecasting will pre-stage agent capacity ahead of historically hot windows.'
+  ]);
+  reg('workload','Analyst Workload','Open incidents by owner','👤',[
+    'Open incident count per analyst and per agent — the live queue-depth distribution.',
+    'Assignment comes from Sentinel ownership; agents appear as owners too. Imbalance signals a routing or capacity issue.',
+    'Capacity and fairness view for the hybrid workforce.',
+    ['Load balancing','Burnout prevention','Routing-rule tuning','Agent-vs-human throughput comparison'],
+    'The Triage Agent carrying 31 open items while top humans sit at 12 shows automation absorbing the routine bulk as designed.',
+    ['Incident-ownership assignment','Roster + agent feed'],
+    'Directly shaped by total-incident volume and severity mix; uneven load here is a downstream symptom.',
+    'Check during the shift; rebalance when any human owner trends well above peers.',
+    'Dynamic auto-assignment will balance by skill, current load, and incident type in real time across humans and agents.'
+  ]);
+  reg('tihit','Threat Intel Hit Rate','ThreatIntelligenceIndicator · over time','🎯',[
+    'Rate at which ingested threat-intel indicators match observed activity in your environment.',
+    'Sentinel matches IOCs (IPs, hashes, domains) from feeds against telemetry. The Threat Hunter pivots on every high-confidence hit.',
+    'Threat-intelligence efficacy view.',
+    ['Feed-quality assessment','Proactive blocking','Hunt seeding','TI-ROI justification'],
+    'A rising hit rate after onboarding a new feed proves the feed is relevant to your actual threat landscape — not just adding noise.',
+    ['TI connectors / TAXII feeds','IOC matching enabled','Telemetry coverage'],
+    'Depends on feed freshness (see the freshness monitor) and broad log coverage.',
+    'Track weekly per feed; a feed with a near-zero hit rate is a candidate to retire.',
+    'TI will shift from atomic IOCs toward behavioral and TTP-level matching, raising effective hit rates against novel infrastructure.'
+  ]);
+  reg('actors','Top Threat Actors','By alerts','🕵',[
+    'Threat-actor groups most associated with alerts in your tenant during the window, ranked by volume.',
+    'Attribution comes from MDTI and analytics-rule tagging. Copilot for Security drafts the actor profile and likely TTPs on demand.',
+    'Strategic threat-landscape view.',
+    ['Adversary-focused defense','Threat briefing','TTP-based hunt planning','Risk-narrative for leadership'],
+    'Repeated APT28 alerts mapped to known MITRE techniques let the Threat Hunter pre-emptively hunt the rest of that actor\'s playbook.',
+    ['MDTI integration','Actor-tagged analytics rules'],
+    'Connects to the TI hit rate and hunt activity; actor prominence steers where hunters look next.',
+    'Review weekly for strategy; pivot hunts toward whichever actor is most active against you.',
+    'Per-tenant actor attribution will sharpen as pooled, privacy-preserving intelligence (in the SaaS tier) correlates campaigns across customers.'
+  ]);
+  reg('azresource','Azure Resource Creation','AzureActivity · over time','🏗',[
+    'Volume of Azure resource-creation events over time — a control-plane activity baseline.',
+    'Sourced from AzureActivity logs. Unusual spikes can indicate crypto-mining deployment or attacker persistence.',
+    'Cloud control-plane anomaly view.',
+    ['Crypto-mining detection','Shadow-IT discovery','Cost-anomaly correlation','Persistence-mechanism hunting'],
+    'A burst of VM creations in an unusual region outside change windows is the signature of compromised-credential resource abuse.',
+    ['AzureActivity connector','Subscription-level diagnostic settings'],
+    'Pairs with subscription-permission changes; resource + permission spikes together are high-signal.',
+    'Watch for deviations from the creation baseline, especially off-hours and in unused regions.',
+    'Resource-graph behavioral modeling will distinguish legitimate IaC bursts from malicious deployment automatically.'
+  ]);
+  reg('subperm','Subscription Permission Changes','RoleAssignments · over time','🔧',[
+    'Rate of RBAC role-assignment changes at the subscription level over time.',
+    'Tracked via AzureActivity role-assignment events. Privilege grants are the attacker\'s path to persistence and lateral movement.',
+    'Authorization-drift monitoring view.',
+    ['Privilege-escalation detection','Least-privilege auditing','Insider-risk monitoring','Change-control verification'],
+    'An Owner-role grant to an unfamiliar principal outside a change window triggers immediate review and possible auto-revocation.',
+    ['AzureActivity connector','RBAC change auditing'],
+    'Interlocks with resource creation and PIM; permission grants often precede resource abuse.',
+    'Review continuously for privileged scopes; correlate every grant with a change ticket.',
+    'Continuous authorization will replace point-in-time grants — permissions evaluated per-request against real-time risk.'
+  ]);
+  reg('compscore','Compliance Score','Defender for Cloud · by framework','📋',[
+    'Regulatory compliance posture scored per framework (NIST 800-53, CIS v8, ISO 27001, Azure CIS) by Defender for Cloud.',
+    'Defender for Cloud continuously assesses resources against control baselines. The Compliance Agent maps gaps to remediation runbooks.',
+    'Governance and audit-readiness view.',
+    ['Audit preparation','Continuous compliance monitoring','Remediation prioritization','Board / regulator reporting'],
+    'NIST at 85% with Azure CIS lagging at 65% tells you exactly where to focus remediation effort for the biggest posture gain.',
+    ['Defender for Cloud enabled','Regulatory-compliance dashboard','Control mappings'],
+    'Directly tied to failing-controls; the score is the inverse aggregate of open control gaps.',
+    'Review monthly and before any audit; track the trend, not just the snapshot.',
+    'Compliance-as-code will auto-remediate drifted controls and keep the score continuously green rather than periodically true.'
+  ]);
+  reg('failctl','Failing Controls','By framework','🔻',[
+    'Count of failing security controls per framework — the concrete, actionable gap list behind the compliance score.',
+    'Each failing control is a specific misconfiguration or missing safeguard. The Compliance Agent attaches a remediation runbook to each.',
+    'Remediation worklist view.',
+    ['Remediation planning','Risk-acceptance tracking','Audit-evidence gathering','Trend monitoring'],
+    'CIS v8 showing 18 failing controls becomes 18 tracked remediation items, each with an owner and a runbook, not a vague score.',
+    ['Defender for Cloud recommendations','Control-to-resource mapping'],
+    'The direct driver of the compliance score; closing these raises the percentage.',
+    'Work the list continuously; prioritize controls that affect the most resources or highest-criticality assets.',
+    'Auto-remediation will close low-risk control gaps without human action, leaving only risk-acceptance decisions for people.'
+  ]);
+
+  // ---- API tiles (image 2) ----
+  reg('api-zombie','Zombie APIs','Defender for APIs · 4 found','👻',[
+    'Deprecated or forgotten API endpoints that are still receiving live traffic — an unmonitored attack surface.',
+    'Defender for APIs inventories every endpoint and flags those marked deprecated yet still serving requests. The API Defense Agent proposes decommission or re-protection.',
+    'API attack-surface reduction.',
+    ['Shadow-API discovery','Attack-surface minimization','Tech-debt cleanup','Unmonitored-endpoint detection'],
+    'A v1 payments endpoint replaced by v3 but still answering requests is a zombie — prime for exploitation because nobody is watching it.',
+    ['Defender for APIs','API Management inventory','Traffic telemetry'],
+    'Connects to unauthenticated-endpoint and sensitive-data detections; zombies often fail those too.',
+    'Audit regularly; any endpoint with no owner and declining-but-nonzero traffic is a candidate to retire.',
+    'Continuous API lifecycle governance will auto-sunset endpoints past their deprecation window with traffic-draining safeguards.'
+  ]);
+  reg('api-unauth','Unauthenticated Endpoints','Defender for APIs · 2 critical','🔓',[
+    'Internet-facing API endpoints exposed without authentication — direct, anonymous access paths.',
+    'Defender for APIs detects endpoints lacking auth controls. Critical findings trigger an APIM policy proposal to require tokens.',
+    'Critical exposure detection.',
+    ['Anonymous-access elimination','Auth-gap closure','Pre-breach hardening','Compliance enforcement'],
+    'A data-returning endpoint reachable with no token is a critical finding — the API Defense Agent stages an APIM auth policy for one-click enforcement.',
+    ['Defender for APIs','API Management','Auth infrastructure (Entra)'],
+    'Overlaps heavily with sensitive-data-exposure and zombie findings.',
+    'Treat as urgent; an unauthenticated endpoint returning any data is a breach waiting to happen.',
+    'Default-deny API gateways will make unauthenticated exposure structurally impossible rather than something to detect after the fact.'
+  ]);
+  reg('api-pii','Sensitive Data Exposure','Defender for APIs + Purview','🔑',[
+    'API requests or responses carrying PII or credentials in query strings — data leaking through URLs into logs and history.',
+    'Defender for APIs inspects traffic patterns; Purview classifies the data. Together they flag credentials and PII in the wrong place.',
+    'Data-leakage prevention at the API layer.',
+    ['Credential-in-URL detection','PII-handling compliance','Log-leakage prevention','Privacy enforcement'],
+    'An API key passed as a query parameter ends up in server logs, proxies, and browser history — Purview classification plus API telemetry catches it.',
+    ['Defender for APIs','Microsoft Purview','Data classification labels'],
+    'Bridges API defense and the Purview governance metrics; a hit here is both a security and a compliance event.',
+    'Monitor continuously; any credential or PII in a query string is a finding to remediate immediately.',
+    'Inline data-loss prevention will redact or block sensitive data in API payloads in real time, before it ever reaches a log.'
+  ]);
+  reg('api-rate','No Rate Limiting','Defender for APIs · APIM enforced','⏱',[
+    'API endpoints lacking rate limits — vulnerable to brute-force, scraping, and resource-exhaustion abuse.',
+    'Defender for APIs identifies endpoints without throttling; API Management enforces limits the API Defense Agent recommends.',
+    'Abuse-resistance posture.',
+    ['Brute-force mitigation','Scraping prevention','DoS resistance','Cost-control on metered backends'],
+    'A login endpoint with no rate limit invites credential stuffing — APIM throttling caps attempts per source and the agent tunes the threshold.',
+    ['Defender for APIs','API Management policies'],
+    'Tightly linked to credential-stuffing and enumeration detections; rate limiting is the structural defense for both.',
+    'Apply limits to every authentication and data-heavy endpoint; tune to balance security against legitimate burst traffic.',
+    'Adaptive rate limiting will adjust per-client limits dynamically based on real-time risk scoring rather than fixed ceilings.'
+  ]);
+  reg('api-enum','Suspicious Enumeration','Defender for APIs · monitoring','🗝',[
+    'Automated, systematic probing of the API surface — an attacker mapping endpoints and parameters for weaknesses.',
+    'Behavioral detection flags sequential/patterned requests inconsistent with normal use. The API Defense Agent can trigger throttling or blocking.',
+    'Reconnaissance detection.',
+    ['Recon-phase interception','Scanner detection','Pre-attack early warning','Bot-traffic identification'],
+    'Rapid sequential requests walking through endpoint IDs or parameter values is enumeration — caught early, it stops the attack before exploitation.',
+    ['Defender for APIs','Behavioral baselines','Traffic analytics'],
+    'Precedes most of the other threat-detection tiles; enumeration is the recon that enables them.',
+    'Monitor continuously; enumeration is an early, high-value signal that an endpoint is being targeted.',
+    'Deception (honeypot endpoints) will turn enumeration attempts into high-confidence attacker fingerprints with near-zero false positives.'
+  ]);
+  reg('api-authanom','Authentication Anomalies','Defender for APIs · 3 flagged','🌐',[
+    'Successful API logins from never-before-seen IPs or at abnormally high volume — possible compromised credentials.',
+    'Behavioral analytics baseline normal auth patterns and flag deviations. Escalations hand off to the Identity Sentinel for session action.',
+    'Account-compromise detection at the API layer.',
+    ['Compromised-credential detection','Impossible-travel-style analysis','Session-anomaly monitoring','Token-theft identification'],
+    'A service account suddenly authenticating from a new country at 10x normal volume is flagged and cross-checked against Entra risk.',
+    ['Defender for APIs','Behavioral baselines','Entra ID risk signals'],
+    'Bridges API defense and identity; works hand-in-glove with risky-sign-ins.',
+    'Investigate flagged anomalies promptly, especially for service accounts and privileged API clients.',
+    'Continuous API session evaluation will mirror CAE — revoking API tokens mid-session the instant risk crosses threshold.'
+  ]);
+  reg('api-exfil','Data Exfiltration Patterns','Defender for APIs · 1 active','📂',[
+    'API response payloads significantly larger than baseline — the signature of bulk data extraction.',
+    'Defender for APIs models normal response sizes per endpoint and flags volume anomalies. Active patterns trigger containment.',
+    'Data-theft detection.',
+    ['Bulk-extraction detection','Insider-threat monitoring','Breach-in-progress identification','Scraping at scale'],
+    'An endpoint normally returning single records suddenly streaming thousands is active exfiltration — the Containment Agent can throttle or cut the session.',
+    ['Defender for APIs','Response-size baselines','Containment playbooks'],
+    'Connects to credential-stuffing (how they got in) and the SOAR containment runbooks (how it\'s stopped).',
+    'Treat active exfiltration as a live incident; speed of containment directly limits data loss.',
+    'Real-time payload inspection with inline DLP will block oversized sensitive responses before the data leaves the boundary.'
+  ]);
+  reg('api-credstuff','Credential Stuffing','Defender for APIs · auto-block','🔐',[
+    'High volumes of 401/403 responses against authentication endpoints — automated testing of stolen credential lists.',
+    'Defender for APIs detects the failed-auth burst pattern; the API Defense Agent triggers APIM blocking and the Identity Sentinel watches for any success.',
+    'Automated-attack detection and response.',
+    ['Stolen-credential-list detection','Bot-attack mitigation','Account-takeover prevention','Auth-endpoint protection'],
+    'A flood of 401s from rotating IPs against the login API is credential stuffing — auto-blocking plus rate limiting shuts it down without human action.',
+    ['Defender for APIs','API Management','Identity Protection'],
+    'The detection counterpart to the no-rate-limiting posture tile; the two together form prevention + detection.',
+    'Auto-response should handle the volume; humans review only if a stuffing attempt yields a successful login.',
+    'Coordinated cross-tenant credential-stuffing intelligence (SaaS tier) will pre-block known attack infrastructure before it reaches any single customer.'
+  ]);
+
+  /* ---- agent modal builder ---- */
+  function openAgentModal(id){
+    const a=agents.find(x=>x.id===id);if(!a)return;
+    const secs=[
+      `${a.name} is an autonomous security agent (${a.role}). ${a.desc}`,
+      'It runs as a Foundry-hosted agent grounded by Copilot for Security, invoking its tools through the Model Context Protocol. It holds a scoped, time-boxed managed identity and is itself a zero-trust principal — every action is authorized per-request and logged immutably.',
+      'Operates across the unified Sentinel workspace and the connected first-party services relevant to its role.',
+      a.chips.map(c=>`${c[0]}: ${c[1]}`),
+      `Representative 24h activity is shown on the card: ${a.chips.map(c=>c[0]+' '+c[1]).join(', ')}.`,
+      ['Microsoft Foundry Agent Service','Copilot for Security grounding','Scoped managed identity (least privilege)','Relevant data connectors for its domain'],
+      'Coordinates with the rest of the fleet through the Foundry orchestration plane — detection agents hand off to decision and action agents under policy gates.',
+      'Active continuously. Human supervisors set its autonomy level (suggest-only, approve-then-act, or auto-act within guardrails) per action class.',
+      'Autonomy expands as confidence and audit history accumulate, with humans moving toward exception-handling and oversight rather than routine execution.'
+    ];
+    renderModal(a.name,a.role,a.ico,secs,a.color);
+  }
+
+  /* ---- generic modal renderer ---- */
+  function renderModal(title,sub,ico,secs,accent){
+    document.getElementById('mhIco').textContent=ico;
+    document.getElementById('mhIco').style.borderColor=(accent||cyan);
+    document.getElementById('mhTitle').textContent=title;
+    document.getElementById('mhSub').textContent=sub;
+    document.getElementById('mhToc').innerHTML=NINE.map((n,i)=>`<a onclick="document.getElementById('msec-${i}').scrollIntoView({behavior:'smooth'})">${i+1}. ${n}</a>`).join('');
+    document.getElementById('mhBody').innerHTML=secs.map((s,i)=>{
+      const body=Array.isArray(s)?`<ul>${s.map(x=>`<li>${x}</li>`).join('')}</ul>`:`<p>${s}</p>`;
+      const na=(typeof s==='string'&&s.toLowerCase().startsWith('not applicable'))?' na':'';
+      return `<div class="msec${na}" id="msec-${i}"><h3><span class="num">${i+1}</span>${NINE[i]}</h3>${body}</div>`;
+    }).join('');
+    const bd=document.getElementById('modalBackdrop');
+    bd.classList.add('open');document.body.style.overflow='hidden';
+    bd._trigger=document.activeElement;
+  }
+  function openModal(id){const m=M[id];if(!m)return;renderModal(m.title,m.sub,m.ico,m.secs,cyan);}
+  function closeModal(){const bd=document.getElementById('modalBackdrop');bd.classList.remove('open');document.body.style.overflow='';if(bd._trigger&&bd._trigger.focus)bd._trigger.focus();}
+
+  /* ============ CHARTS ============ */
+  function lineGrad(ctx,color){const g=ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,color+'44');g.addColorStop(1,color+'00');return g;}
+  function initCharts(){
+    // sign-in volume (grouped bars)
+    new Chart(c_signin,{type:'bar',data:{labels:hrs,datasets:[
+      {label:'Success',data:series(13,800,2400),backgroundColor:cyan+'cc',borderRadius:3},
+      {label:'Failure',data:series(13,40,260),backgroundColor:red+'cc',borderRadius:3}]},options:gridOpt()});
+    // MFA donut
+    new Chart(c_mfa,{type:'doughnut',data:{labels:['Success','Failure'],datasets:[{data:[96.3,3.7],backgroundColor:[lime,red],borderColor:'#0c1122',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false}}}});
+    // risky sign-ins (line, red)
+    new Chart(c_risky,{type:'line',data:{labels:hrs,datasets:[{data:series(13,18,58),borderColor:red,backgroundColor:(c)=>lineGrad(c.chart.ctx,red),fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:gridOpt()});
+    // PIM donut
+    new Chart(c_pim,{type:'doughnut',data:{labels:['User','Role','Group'],datasets:[{data:[86,32,10],backgroundColor:[cyan,amber,red],borderColor:'#0c1122',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{display:false}}}});
+    // incidents by severity (stacked)
+    new Chart(c_sev,{type:'bar',data:{labels:hrs,datasets:[
+      {label:'Low',data:series(13,3,9),backgroundColor:cyan+'cc',borderRadius:2},
+      {label:'Medium',data:series(13,4,11),backgroundColor:amber+'cc',borderRadius:2},
+      {label:'High',data:series(13,2,8),backgroundColor:red+'cc',borderRadius:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{color:grid},ticks:{maxTicksLimit:7}},y:{stacked:true,grid:{color:grid},beginAtZero:true}}}});
+    // TI hit rate
+    new Chart(c_tihit,{type:'line',data:{labels:hrs,datasets:[{data:series(13,5,15),borderColor:cyan,backgroundColor:(c)=>lineGrad(c.chart.ctx,cyan),fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:gridOpt()});
+    // azure resource creation
+    new Chart(c_azres,{type:'line',data:{labels:hrs,datasets:[{data:[40,55,48,62,58,70,150,95,72,60,55,68,52],borderColor:amber,backgroundColor:(c)=>lineGrad(c.chart.ctx,amber),fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:gridOpt()});
+    // permission changes
+    new Chart(c_perm,{type:'line',data:{labels:hrs,datasets:[{data:series(13,6,28),borderColor:pur,backgroundColor:(c)=>lineGrad(c.chart.ctx,pur),fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:gridOpt()});
+    // CA coverage donut
+    new Chart(c_ca,{type:'doughnut',data:{labels:['Covered','Gap'],datasets:[{data:[94,6],backgroundColor:[lime,'#1a2238'],borderColor:'#0c1122',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false}}}});
+    // revocations bar
+    new Chart(c_revoke,{type:'bar',data:{labels:hrs,datasets:[{data:series(13,0,6),backgroundColor:pur+'cc',borderRadius:3}]},options:gridOpt()});
+    // IOC ingestion (multi-line)
+    new Chart(c_ioc,{type:'line',data:{labels:hrs,datasets:[
+      {label:'MDTI',data:series(13,200,500),borderColor:cyan,tension:.4,pointRadius:0,borderWidth:2},
+      {label:'OTX',data:series(13,100,300),borderColor:mag,tension:.4,pointRadius:0,borderWidth:2},
+      {label:'TAXII',data:series(13,60,200),borderColor:lime,tension:.4,pointRadius:0,borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:12,font:{size:10}}}},scales:{x:{grid:{color:grid},ticks:{maxTicksLimit:7}},y:{grid:{color:grid},beginAtZero:true}}}});
+    // compliance trend (multi-line)
+    const wk=['W1','W2','W3','W4','W5','W6','W7','W8'];
+    new Chart(c_comptrend,{type:'line',data:{labels:wk,datasets:[
+      {label:'NIST',data:[74,76,78,80,81,83,84,85],borderColor:lime,tension:.35,pointRadius:2,borderWidth:2},
+      {label:'CIS',data:[68,70,71,73,74,76,77,78],borderColor:cyan,tension:.35,pointRadius:2,borderWidth:2},
+      {label:'ISO',data:[64,65,67,68,69,70,71,72],borderColor:pur,tension:.35,pointRadius:2,borderWidth:2},
+      {label:'AzCIS',data:[55,57,58,60,61,63,64,65],borderColor:amber,tension:.35,pointRadius:2,borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:grid}},y:{grid:{color:grid},min:50,max:100}}}});
+    // agent health (mixed)
+    new Chart(c_agenthealth,{type:'bar',data:{labels:agents.map(a=>a.name.split(' ')[0]),datasets:[
+      {type:'bar',label:'Actions',data:[312,23,46,7,12,18,80,94,41],backgroundColor:cyan+'aa',borderRadius:3,yAxisID:'y'},
+      {type:'line',label:'Health %',data:[100,99,100,100,98,100,99,100,100],borderColor:lime,tension:.3,pointRadius:3,borderWidth:2,yAxisID:'y1'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:12,font:{size:10}}}},
+        scales:{x:{grid:{color:grid},ticks:{font:{size:9}}},y:{grid:{color:grid},beginAtZero:true,position:'left'},y1:{position:'right',min:90,max:100,grid:{display:false}}}}});
+  }
+
+  /* ============ ZERO-TRUST MESH — shared data + helpers (3D and 2D) ============ */
+  const ZT_CORE={n:'Zero-Trust Core',c:0x00e5ff,d:'The policy decision point. Every request — human, agent, workload, device — is evaluated here continuously against identity, device, and risk signals. Nothing is trusted by network location.'};
+  const ZT_NODES=[
+    {n:'Entra ID',c:0x9d6bff,d:'Identity provider and policy enforcement. Issues scoped tokens, runs Conditional Access and CAE. Source of truth for who and what.'},
+    {n:'Sentinel',c:0x00e5ff,d:'Unified SIEM workspace. Ingests all telemetry, correlates incidents, and is the grounding source for the agent fleet.'},
+    {n:'Defender XDR',c:0xff3b5c,d:'Endpoint, API, and cloud detection. Enforces device-health signals feeding the trust evaluation and executes isolation.'},
+    {n:'Purview',c:0x39ff14,d:'Data governance plane. Classifies and labels data, supplies DLP and insider-risk signals as a data-trust overlay.'},
+    {n:'Copilot Security',c:0xffb020,d:'Security reasoning layer. Grounds agent decisions, drafts analysis, and supplies promptbook skills to the fleet.'},
+    {n:'Foundry Agents',c:0xff2d95,d:'The autonomous workforce. Each agent is a least-privilege principal with a time-boxed managed identity, orchestrated here.'},
+    {n:'Workloads',c:0x3b82f6,d:'Apps, APIs, and services. Micro-segmented; each receives only continuously-verified, least-privilege access.'},
+    {n:'Devices',c:0x00e5ff,d:'Managed and BYO endpoints. Compliance and health are signals in every access decision; non-compliant devices are denied.'}
+  ];
+  const hex=c=>'#'+c.toString(16).padStart(6,'0');
+  function webglOK(){try{const c=document.createElement('canvas');return !!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl')));}catch(e){return false;}}
+  function ztSetReadout(o){const ro=document.getElementById('zt-readout');if(ro)ro.innerHTML=`<h5>${o.n.toUpperCase()}</h5><p>${o.d}</p>`;}
+  function openZTNode(o){
+    ztSetReadout(o);
+    renderModal(o.n,'zero-trust node','🛡',[
+      o.d,
+      'Participates in the zero-trust mesh as a verified principal. Every interaction with it is authenticated, authorized per-request, and continuously evaluated — never trusted by network position.',
+      'Across the Microsoft security fabric, integrated through the unified Sentinel workspace and Foundry orchestration.',
+      ['Continuous verification of every request','Least-privilege scoped access','Telemetry contribution to the trust evaluation'],
+      `Live posture for ${o.n} is reflected in the relevant tiles on the SOC overview and identity sections.`,
+      ['Entra ID for identity','Sentinel for telemetry','Policy engine at the core'],
+      'Connected to every other node through the policy core — a change in one node\'s trust state can ripple into access decisions elsewhere.',
+      'Engaged on every access request, all day, with no implicit trust windows.',
+      'The mesh moves toward fully continuous, signal-fused trust scoring where each principal\'s access is recomputed in real time from identity, device, data, and behavioral signals.'
+    ],hex(o.c));
+  }
+
+  /* 2D SVG fallback — always renders, even with no WebGL (VDI / Citrix / locked-down browsers) */
+  function ztFallback(){
+    const host=document.getElementById('zt-canvas-host');if(!host)return;
+    [...host.querySelectorAll('canvas,.zt-svg')].forEach(el=>el.remove());
+    const W=820,H=440,cx=W/2,cy=H/2,R=Math.min(W,H)*0.40;
+    const pts=ZT_NODES.map((nd,i)=>{const a=(i/ZT_NODES.length)*Math.PI*2-Math.PI/2;return {x:cx+Math.cos(a)*R*1.18,y:cy+Math.sin(a)*R*0.86,nd};});
+    const rings=[R*1.30,R*0.92,R*0.52].map(r=>`<ellipse cx="${cx}" cy="${cy}" rx="${r*1.18}" ry="${r*0.86}" fill="none" stroke="#00e5ff" stroke-opacity=".07"/>`).join('');
+    const lines=pts.map(p=>`<line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="${hex(p.nd.c)}" stroke-width="1.4" stroke-opacity=".4"/>`).join('');
+    const nodeEls=pts.map((p,i)=>`<g class="ztnode" data-i="${i}" tabindex="0" role="button" aria-label="${p.nd.n}">
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="27" fill="${hex(p.nd.c)}" fill-opacity=".15" stroke="${hex(p.nd.c)}" stroke-width="1.7"/>
+        <circle class="ztpulse" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="27" fill="none" stroke="${hex(p.nd.c)}" stroke-width="1.5"/>
+        <text x="${p.x.toFixed(1)}" y="${(p.y+(p.y>cy?48:-36)).toFixed(1)}" text-anchor="middle" fill="#eaf6ff" font-family="'Rajdhani',sans-serif" font-size="13.5" font-weight="600">${p.nd.n}</text>
+      </g>`).join('');
+    host.insertAdjacentHTML('afterbegin',`<svg class="zt-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-label="Zero-trust mesh">
+        ${rings}${lines}
+        <g class="ztcore" data-core="1" tabindex="0" role="button" aria-label="Zero-Trust Core">
+          <circle cx="${cx}" cy="${cy}" r="42" fill="#00e5ff" fill-opacity=".12" stroke="#00e5ff" stroke-width="2"/>
+          <circle class="ztpulse" cx="${cx}" cy="${cy}" r="42" fill="none" stroke="#00e5ff" stroke-width="2"/>
+          <text x="${cx}" y="${cy-3}" text-anchor="middle" fill="#eaf6ff" font-family="'Orbitron',sans-serif" font-size="12" font-weight="700">ZERO-TRUST</text>
+          <text x="${cx}" y="${cy+14}" text-anchor="middle" fill="#00e5ff" font-family="'Orbitron',sans-serif" font-size="12" font-weight="700">CORE</text>
+        </g>
+        ${nodeEls}
+      </svg>`);
+    const svg=host.querySelector('.zt-svg');
+    const pick=t=>{const g=t.closest&&t.closest('.ztnode,.ztcore');if(!g)return null;return g.dataset.core?ZT_CORE:ZT_NODES[+g.dataset.i];};
+    svg.addEventListener('click',e=>{const o=pick(e.target);if(o)openZTNode(o);});
+    svg.addEventListener('mouseover',e=>{const o=pick(e.target);if(o)ztSetReadout(o);});
+    svg.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const o=pick(e.target);if(o){e.preventDefault();openZTNode(o);}});
+    const hint=host.querySelector('.zt-hint');if(hint)hint.textContent='2D mode (WebGL unavailable) · click or tab to a node to inspect';
+  }
+
+  /* ============ 3D ZERO-TRUST MESH ============ */
+  function initZT(){
+    const host=document.getElementById('zt-canvas-host');if(!host||!window.THREE)return ztFallback();
+    if(!webglOK())return ztFallback();
+    const W=host.clientWidth,H=host.clientHeight;
+    const scene=new THREE.Scene();
+    const cam=new THREE.PerspectiveCamera(55,W/H,.1,1000);cam.position.set(0,2,15);
+    let rend;
+    try{ rend=new THREE.WebGLRenderer({antialias:true,alpha:true}); }
+    catch(e){ return ztFallback(); }
+    rend.setSize(W,H);rend.setPixelRatio(Math.min(devicePixelRatio,2));host.appendChild(rend.domElement);
+    scene.add(new THREE.AmbientLight(0x88aaff,.6));
+    const pl=new THREE.PointLight(0x00e5ff,1.4,60);pl.position.set(8,8,12);scene.add(pl);
+    const pl2=new THREE.PointLight(0xff2d95,1.0,60);pl2.position.set(-10,-4,8);scene.add(pl2);
+
+    // core
+    const core=new THREE.Mesh(new THREE.IcosahedronGeometry(1.5,1),new THREE.MeshPhongMaterial({color:0x00e5ff,emissive:0x0a4a55,flatShading:true,shininess:80}));
+    core.userData=ZT_CORE;
+    scene.add(core);
+    const halo=new THREE.Mesh(new THREE.TorusGeometry(2.4,.03,16,80),new THREE.MeshBasicMaterial({color:0x9d6bff}));halo.rotation.x=Math.PI/2.4;scene.add(halo);
+
+    const nodes=ZT_NODES;
+    const meshes=[];const R=6;
+    nodes.forEach((nd,i)=>{
+      const ang=(i/nodes.length)*Math.PI*2;
+      const m=new THREE.Mesh(new THREE.OctahedronGeometry(.7,0),new THREE.MeshPhongMaterial({color:nd.c,emissive:nd.c,emissiveIntensity:.25,flatShading:true,shininess:60}));
+      m.position.set(Math.cos(ang)*R,Math.sin(ang)*2.2,Math.sin(ang)*R);
+      m.userData=nd;scene.add(m);meshes.push(m);
+      const pts=[core.position.clone(),m.position.clone()];
+      const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:nd.c,transparent:true,opacity:.35}));
+      scene.add(line);
+    });
+
+    // raycast
+    const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
+    let drag=false,px=0,py=0,rotY=0,rotX=0,tgtY=0,tgtX=0;
+    const ro=document.getElementById('zt-readout');
+    function setReadout(o){ro.innerHTML=`<h5>${o.n.toUpperCase()}</h5><p>${o.d}</p>`;}
+    rend.domElement.style.cursor='grab';
+    rend.domElement.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;rend.domElement.style.cursor='grabbing';});
+    window.addEventListener('pointerup',()=>{drag=false;rend.domElement.style.cursor='grab';});
+    window.addEventListener('pointermove',e=>{if(!drag)return;tgtY+=(e.clientX-px)*.006;tgtX+=(e.clientY-py)*.004;tgtX=Math.max(-.8,Math.min(.8,tgtX));px=e.clientX;py=e.clientY;});
+    rend.domElement.addEventListener('click',e=>{
+      const r=rend.domElement.getBoundingClientRect();
+      mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;
+      ray.setFromCamera(mouse,cam);
+      const hits=ray.intersectObjects([core,...meshes]);
+      if(hits.length){openZTNode(hits[0].object.userData);}
+    });
+
+    let t=0;
+    function loop(){
+      requestAnimationFrame(loop);t+=.005;
+      rotY+=(tgtY-rotY)*.08;rotX+=(tgtX-rotX)*.08;
+      const grp=[core,halo,...meshes];
+      core.rotation.y+=.004;core.rotation.x+=.002;halo.rotation.z+=.006;
+      scene.rotation.y=rotY+(drag?0:t*.12);scene.rotation.x=rotX;
+      meshes.forEach((m,i)=>{m.rotation.y+=.01;m.position.y+=Math.sin(t*2+i)*.004;});
+      rend.render(scene,cam);
+    }
+    loop();
+    window.addEventListener('resize',()=>{const w=host.clientWidth,h=host.clientHeight;cam.aspect=w/h;cam.updateProjectionMatrix();rend.setSize(w,h);});
+  }
+
+  /* ============ SCROLL-SPY + NAV ============ */
+  function setNav(open){
+    const sn=document.querySelector('.sidenav');if(!sn)return;
+    sn.classList.toggle('open',open);
+    document.body.classList.toggle('nav-open',open);
+  }
+  function toggleNav(){const sn=document.querySelector('.sidenav');setNav(!(sn&&sn.classList.contains('open')));}
+  function initNav(){
+    const links=document.querySelectorAll('.nav-link');
+    links.forEach(l=>l.onclick=()=>{
+      const t=document.getElementById(l.dataset.target);
+      if(t)t.scrollIntoView({behavior:'smooth'});
+      setNav(false);
+    });
+    // tap outside the drawer (and not on the toggle) closes it
+    document.addEventListener('click',e=>{
+      const sn=document.querySelector('.sidenav'),tg=document.querySelector('.nav-toggle');
+      if(!sn||!sn.classList.contains('open'))return;
+      if(sn.contains(e.target)||(tg&&tg.contains(e.target)))return;
+      setNav(false);
+    });
+    const secs=[...document.querySelectorAll('section.zone')];
+    const obs=new IntersectionObserver(es=>{
+      es.forEach(e=>{if(e.isIntersecting){
+        links.forEach(l=>l.classList.toggle('active',l.dataset.target===e.target.id));
+      }});
+    },{rootMargin:'-20% 0px -70% 0px'});
+    secs.forEach(s=>obs.observe(s));
+  }
+
+  /* ============ CLOCK + RANGE ============ */
+  function clock(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString('en-US',{hour12:false})+' UTC'+(-d.getTimezoneOffset()/60>=0?'+':'')+(-d.getTimezoneOffset()/60);}
+  function reRange(){const v=document.getElementById('rangeSel').value;document.getElementById('rangeTag').textContent=v.toUpperCase();}
+
+  /* ============ BOOT ============ */
+  function boot(){
+    /* 1 — core interactivity FIRST; never let a chart/3D failure block it */
+    try{ document.querySelectorAll('[data-modal]').forEach(el=>el.onclick=()=>openModal(el.dataset.modal)); }catch(e){console.warn('[ucs] modal wiring',e);}
+    try{ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();setNav(false);}}); }catch(e){}
+    try{ initNav(); }catch(e){console.warn('[ucs] nav',e);}
+    try{ clock();setInterval(clock,1000); }catch(e){}
+    /* 2 — data-driven lists */
+    try{ rankRows('workload-rows',workload,true);rankRows('actor-rows',actors,false);rankRows('failctl-rows',failctl,true); }catch(e){console.warn('[ucs] rank rows',e);}
+    try{ feedRows();guardrailRows();pipelineRows();agentGrid(); }catch(e){console.warn('[ucs] lists',e);}
+    /* 3 — animated numbers, sparklines, charts (guarded so one bad chart can't kill the rest) */
+    try{ document.querySelectorAll('[data-count]').forEach(countUp); }catch(e){}
+    try{ ['sp1','sp2','sp3','sp4','sp5'].forEach((id,i)=>spark(id,[cyan,red,lime,lime,cyan][i])); }catch(e){console.warn('[ucs] sparklines',e);}
+    try{ initCharts(); }catch(e){console.warn('[ucs] charts',e);}
+    /* 4 — fragile WebGL LAST and fully isolated; SVG fallback on any failure */
+    try{ initZT(); }catch(e){console.warn('[ucs] 3D mesh unavailable — using 2D fallback',e); try{ztFallback();}catch(_){} }
+  }
+
+  return {boot,openModal,closeModal,reRange,toggleNav};
+})();
+document.addEventListener('DOMContentLoaded',UCS.boot);
+</script>
+</body>
+</html>
