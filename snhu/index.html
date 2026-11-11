@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNHU Security Architecture Practice · Proposal Command Center · Kenneth P. Barnes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#05070f;--deep:#080b16;--panel:#0c1122;--elev:#111830;
+  --grid:rgba(0,229,255,.06);
+  --cyan:#00e5ff;--mag:#ff2d95;--pur:#9d6bff;--lime:#4ade80;--amb:#ffb020;--blue:#3b82f6;--red:#ff3b5c;
+  --bright:#eaf6ff;--txt:#b9c7e0;--dim:#7f8fb3;--faint:#465573;
+  --border:rgba(0,229,255,.18);--glass:rgba(12,17,34,.78);
+  --head:'Orbitron','Arial Black',Arial,sans-serif;--body:'Rajdhani','Segoe UI',Calibri,sans-serif;--mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);font-size:17px;background:var(--void);color:var(--txt);line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px),
+  radial-gradient(circle at 12% 8%,rgba(157,107,255,.12),transparent 45%),radial-gradient(circle at 88% 92%,rgba(255,45,149,.09),transparent 45%);
+  background-size:46px 46px,46px 46px,100% 100%,100% 100%;background-attachment:fixed}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(5,7,15,.97),rgba(8,11,22,.9));border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.hin{display:flex;align-items:center;gap:16px;padding:12px 26px;flex-wrap:wrap}
+.badge{width:44px;height:44px;border-radius:11px;border:1px solid var(--cyan);display:grid;place-items:center;background:#0f1730;box-shadow:0 0 16px rgba(0,229,255,.4)}
+.brand h1{font-family:var(--head);font-size:16px;letter-spacing:2px;color:var(--bright)}
+.brand p{font-size:13px;color:var(--dim);letter-spacing:1px}
+.live{margin-left:auto;display:flex;gap:10px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--dim)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+nav{display:flex;gap:4px;padding:0 20px 10px;overflow-x:auto}
+nav button{font-family:var(--head);font-size:11px;letter-spacing:1.5px;color:var(--txt);background:transparent;border:1px solid transparent;border-radius:8px;padding:9px 13px;cursor:pointer;white-space:nowrap}
+nav button:hover{border-color:var(--border);color:var(--bright)}
+nav button.on{color:var(--void);background:var(--cyan);box-shadow:0 0 14px rgba(0,229,255,.5)}
+main{max-width:1320px;margin:0 auto;padding:26px}
+section.tab{display:none;animation:fade .35s ease}section.tab.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+h2{font-family:var(--head);font-size:22px;color:var(--bright);letter-spacing:1.5px;margin:6px 0 6px}
+h3{font-family:var(--head);font-size:13px;letter-spacing:2px;color:var(--cyan);margin:26px 0 12px;text-transform:uppercase}
+.lede{color:var(--txt);max-width:900px;margin-bottom:18px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(420px,1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.g5{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.g4f{grid-template-columns:repeat(4,1fr)}.g3f{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:0 8px 30px rgba(0,0,0,.45);position:relative}
+.card h4{font-size:19px;color:var(--bright);margin-bottom:6px;font-weight:700}
+.card p,.card li{font-size:16px}
+.card ul{padding-left:18px}.card li{margin:3px 0}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);color:var(--cyan);margin:2px 4px 2px 0}
+.k{font-family:var(--head);font-size:34px;font-weight:900;line-height:1.1}
+.note{font-size:14px;color:var(--dim);font-style:italic;margin-top:10px}
+.hero{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:center;margin-bottom:10px}
+.hero h2{font-size:38px;line-height:1.15}
+.hero .sub{font-size:20px;color:var(--txt);margin:10px 0 16px}
+.orb{position:relative;height:300px}
+.orb span{position:absolute;inset:0;margin:auto;border-radius:50%;border:1.5px solid var(--cyan);opacity:.5;animation:spin 18s linear infinite}
+.orb span:nth-child(2){width:220px;height:220px;border-color:var(--mag);border-style:dashed;animation-duration:26s;animation-direction:reverse}
+.orb span:nth-child(1){width:290px;height:290px}
+.orb span:nth-child(3){width:150px;height:150px;border-color:var(--pur)}
+.orb b{position:absolute;inset:0;margin:auto;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:#0f1730;border:2px solid var(--cyan);box-shadow:0 0 30px rgba(0,229,255,.5);font-family:var(--head);color:var(--cyan);font-size:12px;text-align:center;letter-spacing:1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ip{display:flex;align-items:center;gap:14px;font-family:var(--head);font-size:15px;letter-spacing:2px;margin-top:6px}
+.ip .x{color:var(--faint);text-decoration:line-through}.ip .y{color:var(--lime);text-shadow:0 0 12px rgba(74,222,128,.6)}
+/* gantt */
+.gantt{display:grid;grid-template-columns:270px repeat(6,1fr);gap:6px 4px;align-items:center}
+.gantt .mh{font-family:var(--head);font-size:11px;letter-spacing:1px;text-align:center;color:var(--bright);background:var(--elev);border:1px solid var(--border);border-radius:6px;padding:7px 0}
+.gantt .lab{font-size:15px;color:var(--bright)}
+.bar{height:20px;border-radius:10px;cursor:pointer;transition:filter .2s}.bar:hover{filter:brightness(1.3)}
+.ms{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.ms div{border:1px solid var(--mag);border-radius:10px;padding:8px 12px;font-size:15px}.ms b{color:var(--mag);font-family:var(--mono);font-size:12px;display:block}
+/* flow */
+.flow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+.flow .st{flex:1 1 150px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;position:relative}
+.flow .st .n{font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:2px}
+.flow .st h5{font-size:17px;color:var(--bright);margin:4px 0}
+.flow .st p{font-size:14px}
+.arrow{align-self:center;color:var(--cyan);font-size:22px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{font-family:var(--head);font-size:11px;letter-spacing:1px;color:var(--bright);background:#1a2650;padding:9px;text-align:left;border:1px solid #24345f}
+td{padding:8px 9px;border:1px solid #24345f;background:rgba(16,26,51,.7)}
+tr:nth-child(even) td{background:rgba(12,20,40,.7)}
+td.c{text-align:center;font-family:var(--mono)}
+.A{color:var(--cyan);font-weight:700}.R{color:var(--mag);font-weight:700}
+.prim{background:rgba(0,229,255,.85)!important;color:#05070f;font-weight:700;text-align:center}
+.sec{text-align:center;color:var(--dim)}
+.ob{color:var(--amb)}
+/* maturity */
+.mrow{display:grid;grid-template-columns:170px 1fr;gap:12px;align-items:center;margin:8px 0}
+.mtrack{position:relative;height:22px;background:#0b1328;border:1px solid #24345f;border-radius:11px}
+.mtrack i{position:absolute;left:0;top:0;bottom:0;border-radius:11px}
+.mtrack .m18{background:rgba(255,45,149,.55)}.mtrack .m6{background:var(--cyan);height:10px;top:5px}
+.legend{display:flex;gap:18px;font-size:14px;margin-top:8px}.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+/* patterns */
+.pat{cursor:pointer;text-align:center;transition:transform .2s,border-color .2s}
+.pat:hover,.pat.sel{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 0 22px rgba(0,229,255,.25)}
+.ic{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--c,var(--cyan));display:grid;place-items:center;margin:0 auto 10px;background:#070b18;font-size:24px;color:var(--c,var(--cyan))}
+.pdetail{margin-top:18px;display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+.pdetail .svgbox{background:#070b18;border:1px solid var(--border);border-radius:14px;padding:10px}
+.mono{font-family:var(--mono);font-size:13px;white-space:pre;color:var(--bright);background:#070b18;border:1px solid var(--border);border-radius:12px;padding:14px;overflow:auto}
+/* phases */
+.phase{border-left:3px solid var(--c);padding-left:12px}
+.stack{display:flex;flex-direction:column-reverse;width:70px;margin:0 auto;border-radius:6px;overflow:hidden}
+.stack div{display:grid;place-items:center;font-family:var(--mono);font-size:12px;color:#05070f;font-weight:700}
+.stacks{display:flex;justify-content:space-around;align-items:flex-end;height:280px;border-bottom:1px solid #24345f;padding-bottom:4px}
+.stacks .col{text-align:center}.stacks .col small{display:block;margin-top:8px;font-size:13px;color:var(--txt)}
+/* stride */
+.stride .L{font-family:var(--head);font-size:26px;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--c);color:var(--c);float:left;margin-right:12px}
+/* layers */
+.layer{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--c);border-radius:10px;margin:6px 0;background:rgba(16,26,51,.75);cursor:pointer;transition:transform .2s}
+.layer:hover,.layer.sel{transform:translateX(6px);box-shadow:0 0 16px var(--c)}
+.layer b{font-family:var(--mono);color:var(--c);font-size:13px;min-width:34px}
+.layer span{color:var(--bright);font-size:16px}
+.new{font-family:var(--mono);font-size:10px;color:var(--mag);border:1px solid var(--mag);border-radius:10px;padding:1px 6px;margin-left:auto}
+.ldesc{position:sticky;top:120px}
+footer{border-top:1px solid var(--border);margin-top:40px;padding:22px 26px;font-size:14px;color:var(--dim);text-align:center}
+.disc{border:1px dashed var(--amb);color:var(--amb);border-radius:10px;padding:10px 14px;font-size:14px;margin:12px 0}
+@media(max-width:900px){.g3f{grid-template-columns:1fr}.g4f{grid-template-columns:1fr 1fr}.hero,.pdetail{grid-template-columns:1fr}.gantt{grid-template-columns:150px repeat(6,1fr)}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hin">
+    <div class="badge"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="1.8"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z"/><path d="M8.5 12l2.4 2.4L15.8 9.5"/></svg></div>
+    <div class="brand"><h1>SECURITY ARCHITECTURE PRACTICE · COMMAND CENTER</h1><p>Proposal for Southern New Hampshire University · via Riptide Technologies &amp; Global Technical Search · Kenneth P. Barnes</p></div>
+    <div class="live"><span class="dot"></span><span id="clock">PLAN v1.0</span></div>
+  </div>
+  <nav id="nav"></nav>
+</header>
+
+<main>
+<!-- ============ MISSION ============ -->
+<section class="tab on" id="t-mission">
+  <div class="hero">
+    <div>
+      <div class="ip"><span class="x">IMPOSSIBLE</span><span style="color:var(--cyan)">→</span><span class="y">POSSIBLE</span></div>
+      <h2>Three year-long programs, one six-month engagement</h2>
+      <p class="sub">Stand up SNHU's security architecture practice, build a secure pattern library its teams reuse, and harden Azure against recognized benchmarks, then hand all of it to SNHU's own architects.</p>
+      <span class="tag">Reports to Deputy CISO</span><span class="tag">100% remote</span><span class="tag">6 months · T&amp;M</span><span class="tag">MCSB · CIS · WAF · CAF</span><span class="tag">NIST CSF 2.0 · 800-53 · Zero Trust</span>
+    </div>
+    <div class="orb"><span></span><span></span><span></span><b>SNHU<br>PRACTICE</b></div>
+  </div>
+  <div class="disc">Planning artifact. Every number on this page is either Ken's delivered track record (labeled) or a proposed target to calibrate with SNHU in Month 1. Nothing here is SNHU data or an assessment result.</div>
+
+  <h3>The mandate</h3>
+  <div class="grid g3" id="objectives"></div>
+
+  <h3>Proposed success measures at Month 6 (targets)</h3>
+  <div class="grid g4f" id="kpis"></div>
+
+  <h3>Track record behind the plan</h3>
+  <div class="grid g4f" id="proofstats"></div>
+</section>
+
+<!-- ============ ROADMAP ============ -->
+<section class="tab" id="t-roadmap">
+  <h2>Six-month delivery roadmap</h2>
+  <p class="lede">Mirrors SNHU's suggested timeline. Workstreams overlap on purpose: Azure findings rank the patterns, and each pattern becomes a remediation target. Click a bar for its deliverables.</p>
+  <div class="card"><div class="gantt" id="gantt"></div>
+    <div class="ms" id="milestones"></div>
+    <div id="barinfo" class="note">Select a workstream bar to see its deliverables.</div>
+  </div>
+  <h3>Knowledge transfer built into the calendar</h3>
+  <div class="grid g3" id="kt"></div>
+</section>
+
+<!-- ============ PRACTICE ============ -->
+<section class="tab" id="t-practice">
+  <h2>Objective 1 · The practice</h2>
+  <p class="lede">An operating model, a review process teams want to use, and governance artifacts SNHU owns. The guiding principle: make the secure way the easy way.</p>
+  <div class="grid g4" id="opmodel"></div>
+  <h3>Security architecture review process</h3>
+  <div class="flow" id="review"></div>
+  <div class="grid g3" style="margin-top:14px" id="tiers"></div>
+  <h3>RACI (draft for Month 2 agreement)</h3>
+  <div class="card" style="overflow:auto"><table id="raci"></table><p class="note">R responsible · A accountable · C consulted · I informed. Only the Deputy CISO accepts risk exceptions.</p></div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><h4>Target maturity (1–5), baselined in Month 1</h4><div id="maturity"></div>
+      <div class="legend"><span style="--c:var(--cyan)">Month 6 target</span><span style="--c:rgba(255,45,149,.7)">Month 18 target</span></div></div>
+    <div class="card"><h4>Recommended practice team</h4><ul id="team"></ul><p class="note">Final sizing in Month 5 from measured review volume.</p></div>
+  </div>
+</section>
+
+<!-- ============ PATTERNS ============ -->
+<section class="tab" id="t-patterns">
+  <h2>Objective 2 · Secure pattern library</h2>
+  <p class="lede">Ten candidate patterns. Each ships with context, a reference diagram, required controls, configuration guidance and framework alignment, plus IaC modules and an Azure Policy initiative. Select a pattern.</p>
+  <div class="grid g5" id="patgrid"></div>
+  <div class="pdetail" id="pdetail"></div>
+  <h3>Patterns as code</h3>
+  <div class="grid g2">
+    <div class="card"><h4>Lifecycle</h4><div class="flow" id="lifecycle"></div></div>
+    <div class="mono">patterns/
+  identity-access/
+    README.md               context, decisions, owner, review date
+    reference.drawio        reference diagram
+    controls.yaml           MCSB · CIS v8 · NIST 800-53 mapping
+    policy/initiative.json  Azure Policy initiative
+    terraform/  bicep/      IaC modules
+    tests/                  PSRule / Checkov / policy tests
+  network-segmentation/     ...
+  CHANGELOG.md              monthly pattern release</div>
+  </div>
+</section>
+
+<!-- ============ AZURE ============ -->
+<section class="tab" id="t-azure">
+  <h2>Objective 3 · Azure assessment &amp; hardening</h2>
+  <p class="lede">The assessment plan: which benchmark leads for each area SNHU named. Outputs are a risk-rated gap report, per-service baseline definitions and prioritized recommendations.</p>
+  <div class="card" style="overflow:auto"><table id="bench"></table></div>
+  <h3>Policy-as-code guardrails, commit to cloud</h3>
+  <div class="flow" id="pac"></div>
+  <h3>Phased remediation roadmap (indicative person-weeks, finalized after Month 1)</h3>
+  <div class="grid g2">
+    <div class="card"><div class="stacks" id="stacks"></div>
+      <div class="legend"><span style="--c:var(--cyan)">Identity</span><span style="--c:var(--blue)">Network</span><span style="--c:var(--lime)">Data</span><span style="--c:var(--mag)">Platform &amp; policy</span></div></div>
+    <div class="grid" id="phases"></div>
+  </div>
+  <h3>Exception management</h3>
+  <div class="grid g3">
+    <div class="card"><h4>Recorded as code</h4><p>Azure Policy exemptions live in Git with an expiry date, a justification and a link to the decision record.</p></div>
+    <div class="card"><h4>Owned and compensated</h4><p>Every exception names a risk owner and the compensating controls; the Deputy CISO accepts the risk.</p></div>
+    <div class="card"><h4>Self-expiring</h4><p>Expiring exemptions open a review ticket automatically, so exceptions never become permanent by default.</p></div>
+  </div>
+</section>
+
+<!-- ============ CONTROLS ============ -->
+<section class="tab" id="t-controls">
+  <h2>One control spine for every framework and obligation</h2>
+  <p class="lede">Each pattern and standard maps to this spine once, so a single piece of evidence serves NIST, CIS, Zero Trust and higher-education obligations (FERPA, GLBA Safeguards Rule, PCI DSS, and HIPAA where health services apply). Draft mapping, validated with SNHU compliance in Month 2.</p>
+  <div class="card" style="overflow:auto"><table id="spine"></table></div>
+  <h3>STRIDE threat modeling built into every pattern</h3>
+  <div class="grid g3f stride" id="stride"></div>
+</section>
+
+<!-- ============ AI / AGI ============ -->
+<section class="tab" id="t-ai">
+  <h2>Forward look · Zero Trust for AI, agents and the road to AGI</h2>
+  <p class="lede">AI tutors, advisors and copilots are arriving across higher education. The practice SNHU builds now should treat every agent as a workload with its own identity, data boundary and pattern. The stack below is Ken's published 10-layer reference architecture (<a href="https://github.com/kennyb7322/zt-ai-agi-security" target="_blank" rel="noopener">github.com/kennyb7322/zt-ai-agi-security</a>), with Terraform and Python automation. Select a layer.</p>
+  <div class="grid g2">
+    <div id="layers"></div>
+    <div><div class="card ldesc" id="ldesc"></div></div>
+  </div>
+  <h3>What it means for SNHU now</h3>
+  <div class="grid g4" id="aisnhu"></div>
+  <h3>The agentic SOC pipeline (illustrative, from Ken's SOC command center)</h3>
+  <div class="flow" id="soc"></div>
+</section>
+
+<!-- ============ PROOF ============ -->
+<section class="tab" id="t-proof">
+  <h2>Proof, exhibits and engagement</h2>
+  <div class="grid g3f" id="cases"></div>
+  <h3>Exhibits</h3>
+  <div class="grid g3f" id="exhibits"></div>
+  <h3>Credentials against SNHU's preferred list</h3>
+  <div class="card"><div id="creds"></div><p class="note">AZ-305 is not held; SC-100 (Cybersecurity Architect Expert) covers the expert-level design ground from the security side.</p></div>
+  <h3>Engagement</h3>
+  <div class="grid g4">
+    <div class="card"><div class="k" style="color:var(--cyan)">$125/hr</div><p>Time and materials</p></div>
+    <div class="card"><div class="k" style="color:var(--mag)">6 mo</div><p>Remote; level of effort to suit SNHU</p></div>
+    <div class="card"><div class="k" style="color:var(--lime)">Now</div><p>Available promptly; references on request</p></div>
+    <div class="card"><h4>Momentum</h4><p>Also in process for a State of Oregon engagement migrating enterprise content into SharePoint Online in Microsoft 365 GCC.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px;text-align:center">
+    <h4 style="font-family:var(--head);letter-spacing:2px">KENNETH P. BARNES</h4>
+    <p>Senior Security Architecture Consultant · Founder, CTO &amp; CISO, UCS Solutions</p>
+    <p><a href="mailto:KBarnes@ucsolutions.com">KBarnes@ucsolutions.com</a> · 815-713-4151 · <a href="https://www.linkedin.com/in/drkennethpbarnes" target="_blank" rel="noopener">linkedin.com/in/drkennethpbarnes</a> · <a href="https://github.com/kennyb7322" target="_blank" rel="noopener">github.com/kennyb7322</a></p>
+  </div>
+</section>
+</main>
+
+<footer>Proposal artifact prepared by Kenneth P. Barnes (UCS Solutions) for Southern New Hampshire University via Riptide Technologies and Global Technical Search. Plans and targets are illustrative and to be calibrated with SNHU; this is not an SNHU system and contains no SNHU data. © 2026 Kenneth P. Barnes.</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,a={},h='')=>{const e=document.createElement(t);for(const k in a){if(k==='style')e.setAttribute('style',a[k]);else if(k==='cls')e.className=a[k];else e.setAttribute(k,a[k])}e.innerHTML=h;return e};
+const C={cyan:'#00e5ff',mag:'#ff2d95',pur:'#9d6bff',lime:'#4ade80',amb:'#ffb020',blue:'#3b82f6'};
+
+// nav
+const tabs=[['mission','MISSION'],['roadmap','ROADMAP'],['practice','PRACTICE'],['patterns','PATTERN LIBRARY'],['azure','AZURE HARDENING'],['controls','CONTROL SPINE'],['ai','AI / AGI HORIZON'],['proof','PROOF & ENGAGEMENT']];
+tabs.forEach(([id,l],i)=>{const b=el('button',{cls:i?'':'on'},l);b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelectorAll('section.tab').forEach(s=>s.classList.remove('on'));$('#t-'+id).classList.add('on');window.scrollTo({top:0,behavior:'smooth'})};$('#nav').append(b)});
+
+// mission
+[['1 · Establish the practice',C.cyan,'Mission, scope and operating model; review process with intake, SDLC checkpoints, decisions and exceptions; principles, standards, templates and RACI; staffing model; 12–18 month roadmap.','Month 6: running review board with a charter the Deputy CISO signs'],
+ ['2 · Secure pattern library',C.mag,'Highest-priority patterns from SNHU workloads with context, diagram, controls, configuration guidance and framework alignment, plus a process that keeps the library growing.','Month 6: approved, versioned patterns with named owners'],
+ ['3 · Assess & harden Azure',C.lime,'Landing zones, subscriptions, Azure Policy, Defender for Cloud, Entra ID, network controls and IaC, benchmarked against MCSB, CIS, the WAF security pillar and CAF.','Month 6: gap assessment and phased, estimated remediation roadmap']
+].forEach(([h,c,d,o])=>$('#objectives').append(el('div',{cls:'card',style:`border-color:${c}66`},`<h4 style="color:${c}">${h}</h4><p>${d}</p><p class="note" style="color:var(--bright)">${o}</p>`)));
+[['≤ 10 days','Tier-1 review turnaround',C.cyan],['≥ 6','approved patterns in v1 library',C.mag],['100%','subscriptions under a baseline Policy initiative (audit)',C.lime],['0','exceptions without owner or expiry',C.amb]
+].forEach(([k,l,c])=>$('#kpis').append(el('div',{cls:'card'},`<div class="k" style="color:${c}">${k}</div><p>${l}</p><span class="tag">target</span>`)));
+[['100+','founding or virtual CISO engagements',C.pur],['40%','faster ARB cycle time; 30+ architects coached (Amazon)',C.lime],['12,000+','identities on Entra ID CA, MFA & PIM (Texas DPS)',C.cyan],['60+','Zero Trust implementations under NIST SP 800-207',C.mag],
+ ['325+','FedRAMP control assessments, zero adverse findings',C.amb],['455','architecture documents across 15 domains (Texas DPS)',C.blue],['1,000+','posture cases moved to owner remediation (GE Appliances)',C.lime],['6','higher-ed institutions: PeopleSoft security programs',C.pur]
+].forEach(([k,l,c])=>$('#proofstats').append(el('div',{cls:'card'},`<div class="k" style="color:${c}">${k}</div><p>${l}</p><span class="tag" style="color:var(--lime);border-color:#4ade8055">delivered</span>`)));
+
+// roadmap
+const ws=[['Discovery & current-state Azure review',0,1,C.cyan,'Stakeholder interviews, workload inventory, Azure tenant and subscription walkthrough, Defender for Cloud and Policy baseline export, initial risk themes, discovery readout.'],
+ ['Charter, operating model & review process',1,3,C.cyan,'Practice charter, mission and scope, engagement modes, intake form, risk tiering, review checkpoints, decision record and exception workflow.'],
+ ['Principles, standards, templates & RACI',1,3,C.pur,'Ten architecture principles, domain reference standards mapped to MCSB and CIS, design review / STRIDE threat model / decision record templates, RACI.'],
+ ['Azure assessment findings',1,3,C.lime,'Risk-rated gap report across landing zones, Policy, Defender for Cloud, Entra ID, network and IaC versus MCSB, CIS Azure Foundations, WAF security pillar and CAF.'],
+ ['Secure pattern library development',2,5,C.mag,'Patterns ranked by SNHU workloads; each with diagram, controls, configuration guidance, framework mapping, IaC modules and Azure Policy initiative.'],
+ ['Hardening recommendations & roadmap',2,5,C.amb,'Policy-as-code, pipeline guardrails, drift detection, exception management and monitoring recommendations; phased, estimated remediation roadmap.'],
+ ['Refinement, maturity roadmap & handoff',5,6,C.blue,'12–18 month practice roadmap, staffing recommendation, final handoff package, recorded knowledge transfer and runbooks.'],
+ ['Knowledge transfer (continuous)',0,6,'#7f8fb3','Shadow (M1–2) → co-own (M3–4) → own (M5–6).']];
+const g=$('#gantt');g.append(el('div'));for(let m=1;m<=6;m++)g.append(el('div',{cls:'mh'},'MONTH '+m));
+ws.forEach(([l,a,b,c,d],ri)=>{g.append(el('div',{cls:'lab',style:`grid-column:1;grid-row:${ri+2}`},l));const w=el('div',{style:`grid-column:${a+2} / ${b+2};grid-row:${ri+2}`});const bar=el('div',{cls:'bar',style:`background:${c};box-shadow:0 0 12px ${c}88`,title:d});bar.onclick=()=>{$('#barinfo').innerHTML=`<b style="color:${c};font-style:normal">${l}:</b> ${d}`};w.append(bar);g.append(w);if(b<6){/* spacer */}});
+[['M1','Discovery readout'],['M3','Charter signed · assessment report'],['M5','Pattern library v1 · remediation roadmap'],['M6','Handoff package']].forEach(([m,l])=>$('#milestones').append(el('div',{},`<b>◆ ${m}</b>${l}`)));
+[['Shadow','Months 1–2',C.cyan,'SNHU architects join discovery and the first reviews; templates are built with them, not for them.'],['Co-own','Months 3–4',C.pur,'SNHU architects lead Tier-2 reviews and draft patterns; Ken reviews and coaches.'],['Own','Months 5–6',C.lime,'SNHU runs the board and the monthly pattern release; Ken advises, then hands off formally.']]
+.forEach(([h,m,c,d])=>$('#kt').append(el('div',{cls:'card',style:`border-color:${c}`},`<div class="k" style="color:${c};font-size:28px">${h}</div><p style="color:var(--bright);font-weight:700">${m}</p><p>${d}</p>`)));
+
+// practice
+[['Mission','Make the secure way the easy way: approved patterns, fast reviews and clear decisions for every team building on SNHU platforms.'],['Scope','Azure and hybrid infrastructure, applications, identity, data and AI workloads; new builds and material changes.'],['Engagement modes','Consult early (office hours) · review (tiered) · pattern (reuse first) · exception (time-boxed, risk-owned).'],['Cadence','Weekly review board · monthly pattern release · quarterly maturity check with the Deputy CISO.']]
+.forEach(([h,d])=>$('#opmodel').append(el('div',{cls:'card'},`<h4 style="color:var(--cyan)">${h}</h4><p>${d}</p>`)));
+const rv=[['Intake','Short form; triggers on new systems, student data, internet exposure, identity changes'],['Risk tiering','Tier 1–3 sets review depth and turnaround'],['Design review + threat model','Pattern fit first, then STRIDE on the deltas'],['Decision record','One page: decision, rationale, conditions, owner'],['Exceptions','Time-boxed, compensating controls, risk owner signs'],['SDLC checkpoints','Design, pre-build and pre-production gates in the pipeline']];
+rv.forEach(([h,d],i)=>{$('#review').append(el('div',{cls:'st'},`<div class="n">STEP 0${i+1}</div><h5>${h}</h5><p>${d}</p>`));if(i<rv.length-1)$('#review').append(el('div',{cls:'arrow'},'➜'))});
+[['Tier 1 · Full board',C.mag,'Student records or PII at scale, internet-facing, new identity provider or trust boundary','≤ 10 business days'],['Tier 2 · Standard',C.amb,'Material change to an existing system; partial pattern fit','≤ 5 business days'],['Tier 3 · Self-attest',C.lime,'Fully matches approved patterns; logged and spot-checked','Same week']]
+.forEach(([h,c,d,t])=>$('#tiers').append(el('div',{cls:'card',style:`border-color:${c}`},`<h4 style="color:${c}">${h}</h4><p>${d}</p><p class="note">Target turnaround: ${t}</p>`)));
+const raciH=['Activity','Practice lead','Domain architect','Product / project','Deputy CISO','Cloud platform'];
+const raci=[['Submit intake','I','C','R/A','I','C'],['Tier and schedule','A','R','C','I','I'],['Design review','A','R','C','I','C'],['Approve pattern','R','C','I','A','C'],['Accept risk exception','C','C','R','A','I'],['Implement guardrail','C','C','I','I','R/A'],['Publish pattern update','A','R','I','I','C']];
+$('#raci').innerHTML='<tr>'+raciH.map(h=>`<th>${h}</th>`).join('')+'</tr>'+raci.map(r=>'<tr>'+r.map((c,i)=>i?`<td class="c ${c.includes('A')?'A':c.includes('R')?'R':''}">${c}</td>`:`<td>${c}</td>`).join('')+'</tr>').join('');
+[['Governance',3,4],['Review process',3,4],['Pattern coverage',2,4],['Policy-as-code',2,4],['Posture monitoring',3,4],['Threat modeling',2,3]]
+.forEach(([l,a,b])=>$('#maturity').append(el('div',{cls:'mrow'},`<span style="color:var(--bright)">${l}</span><div class="mtrack"><i class="m18" style="width:${b*20}%"></i><i class="m6" style="width:${a*20}%"></i></div>`)));
+[['Practice lead','charter, board and roadmap'],['Cloud security architect','Azure patterns and landing zones'],['Identity architect','Entra ID, access and privileged patterns'],['Security engineer','policy-as-code and pipeline guardrails'],['Threat modeling (shared)','rotating role, trained in Months 3–6']]
+.forEach(([r,d])=>$('#team').append(el('li',{},`<b style="color:var(--bright)">${r}</b>: ${d}`)));
+
+// patterns
+const P=[
+ {n:'Identity & access',i:'⚿',c:C.cyan,ctx:'Every student, faculty and staff sign-in, and every admin role, flows through one identity control plane.',ctl:['MFA for all users; phishing-resistant MFA for administrators','Block legacy authentication','Device and sign-in risk conditions in Conditional Access','Just-in-time admin through PIM; break-glass accounts with alerting'],cfg:'CA policy set with a naming convention, report-only first, staged rollout by population, exclusions reviewed monthly.',map:{MCSB:'IM-1 · IM-6 · IM-7 · PA-2',CIS:'5 · 6',N:'IA-2 · AC-2 · AC-6',ZT:'Identity'},d:[['Students · faculty · staff','Entra ID + Conditional Access','SaaS · Azure · on-prem apps']]},
+ {n:'Network segmentation',i:'⛶',c:C.blue,ctx:'Workloads sit in spokes behind a hub firewall; PaaS is reached privately; nothing sensitive is internet-routable by default.',ctl:['Hub-spoke with Azure Firewall and forced tunneling','Private Link / private endpoints for PaaS','NSGs deny-by-default with flow logs','DDoS Protection on public entry points'],cfg:'Landing-zone network module in Terraform/Bicep; Policy denies public IPs on sensitive spokes; route tables managed as code.',map:{MCSB:'NS-1 · NS-2 · NS-3 · NS-5',CIS:'12 · 13',N:'SC-7 · AC-4',ZT:'Networks'},d:[['Spoke workloads','Hub: Azure Firewall','Private endpoints']]},
+ {n:'Secrets & keys',i:'🔑',c:C.amb,ctx:'No secrets in code or pipelines; workloads authenticate with managed identities; keys are owned, rotated and logged.',ctl:['Managed identities for service-to-service auth','Key Vault with RBAC, soft delete and purge protection','Customer-managed keys where data sensitivity requires','Rotation and expiry alerts for secrets and certificates'],cfg:'Key Vault per application boundary with private endpoint; Policy audits public network access and missing expiry dates.',map:{MCSB:'IM-3 · IM-8 · DP-6 · DP-7 · DP-8',CIS:'3 · 4',N:'SC-12 · SC-13 · IA-5',ZT:'Applications & workloads'},d:[['App / pipeline','Managed identity','Key Vault (private)']]},
+ {n:'Data protection',i:'🛡',c:C.lime,ctx:'Student, financial and health data is discovered, labeled and protected in transit, at rest and in use.',ctl:['Purview discovery, classification and sensitivity labels','Encryption in transit (TLS 1.2+) and at rest by default','DLP policies for FERPA-relevant and payment data','Public access disabled on storage holding labeled data'],cfg:'Label taxonomy agreed with Registrar and Compliance; storage baseline denies public blob access; DLP in audit, then enforce.',map:{MCSB:'DP-1 · DP-2 · DP-3 · DP-4 · DP-5',CIS:'3',N:'SC-8 · SC-28 · MP',ZT:'Data'},d:[['Data sources','Purview labels + DLP','Encrypted stores']]},
+ {n:'Logging & monitoring',i:'📈',c:C.pur,ctx:'Every security-relevant signal lands in one workspace with retention set by policy and detections tuned to SNHU.',ctl:['Diagnostic settings enforced by Policy (DINE)','Entra sign-in, audit and PIM logs to Sentinel','Defender for Cloud plans on for in-scope resource types','Retention aligned to regulatory needs'],cfg:'Central Log Analytics workspace; diagnostic-settings initiative at management-group scope; detection rules as code.',map:{MCSB:'LT-1 · LT-3 · LT-4 · LT-5 · LT-6',CIS:'8 · 13',N:'AU-2 · AU-6 · AU-12 · SI-4',ZT:'Visibility & analytics'},d:[['Azure resources · Entra','Diagnostic settings','Sentinel workspace']]},
+ {n:'PaaS integration',i:'⚡',c:C.cyan,ctx:'Applications compose PaaS services over private networking and managed identity, through a governed API layer.',ctl:['Private endpoints on data and integration services','Managed identity between services','APIM as the governed API front door','Service firewall rules deny public access'],cfg:'Reusable module per service type with private endpoint, diagnostic settings and identity wired in by default.',map:{MCSB:'NS-2 · IM-3 · DP-3',CIS:'12 · 16',N:'SC-7 · SC-8 · IA-9',ZT:'Applications & workloads'},d:[['Client apps','APIM','PaaS via Private Link']]},
+ {n:'Application hosting',i:'▣',c:C.blue,ctx:'Web apps and APIs run on hardened App Service or AKS baselines behind a web application firewall.',ctl:['Front Door or App Gateway with WAF','App Service / AKS security baselines','Build-time scanning and signed images','Runtime protection with Defender for Containers / App Service'],cfg:'Landing pattern per hosting model; pipeline gates on IaC and image scans; Policy enforces HTTPS-only and minimum TLS.',map:{MCSB:'NS-6 · PV-1 · DS-6',CIS:'4 · 16',N:'SA-11 · SI-10 · SC-7',ZT:'Applications & workloads'},d:[['Users','Front Door + WAF','App Service / AKS']]},
+ {n:'Secure AI & agents',i:'🤖',c:C.mag,ctx:'AI tutors, advisors and copilots are workloads with their own identity, data boundary and guardrails.',ctl:['Per-agent identity; no agent ID, no production','Prompt-injection and output validation at the gateway','Grounding data scoped by labels and access','Human approval for consequential agent actions'],cfg:'Azure OpenAI behind private endpoint and APIM; content filters on; agent actions logged to Sentinel; red-team before launch.',map:{MCSB:'IM-3 · DP-1 · LT-1',CIS:'3 · 16',N:'AC-6 · SI-10 · AU-12',ZT:'Identity · Data',X:'NIST AI RMF · ISO/IEC 42001 · OWASP LLM Top 10'},d:[['Students · staff','AI gateway + guardrails','Model + scoped data']]},
+ {n:'Privileged access',i:'👑',c:C.amb,ctx:'No standing admin rights; privileged work happens just in time, from trusted devices, with approval and audit.',ctl:['PIM eligible roles with approval for critical roles','Privileged access workstations for tier-0 admins','Two monitored break-glass accounts','Quarterly access reviews'],cfg:'Role catalog with owners; PIM settings as code; alerts on break-glass use and on permanent assignments.',map:{MCSB:'PA-1 · PA-2 · PA-4 · PA-5 · PA-6 · PA-7',CIS:'5 · 6',N:'AC-2 · AC-6 · IA-2',ZT:'Identity · Devices'},d:[['Admins (eligible)','PIM + PAW','Azure / Entra roles']]},
+ {n:'Hybrid & multi-cloud',i:'🌐',c:C.lime,ctx:'On-premises systems and other clouds connect privately and are governed with the same identity and policy plane.',ctl:['ExpressRoute or VPN to the hub; no direct spoke exposure','Azure Arc for policy and Defender coverage off-Azure','Federated identity, one source of truth','Consistent tagging and ownership'],cfg:'Connectivity module in the hub; Arc onboarding runbook; Policy assignments extended to Arc-enabled resources.',map:{MCSB:'NS-9 · IM-1 · AM-1',CIS:'1 · 12',N:'SC-7 · AC-17 · CA-3',ZT:'Networks · Infrastructure'},d:[['On-prem / other cloud','ExpressRoute / VPN · Arc','Azure hub']]}
+];
+P.forEach((p,i)=>{const c=el('div',{cls:'card pat'+(i?'':' sel')},`<div class="ic" style="--c:${p.c}">${p.i}</div><h4 style="font-size:17px">${p.n}</h4>`);c.onclick=()=>{document.querySelectorAll('.pat').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');showP(i)};$('#patgrid').append(c)});
+function diag(p){const [a,b,c]=p.d[0];const box=(x,t,col)=>`<rect x="${x}" y="70" width="170" height="80" rx="10" fill="#0f1730" stroke="${col}" stroke-width="2"/><foreignObject x="${x+8}" y="78" width="154" height="64"><div xmlns="http://www.w3.org/1999/xhtml" style="color:#eaf6ff;font:600 15px Rajdhani,Calibri,sans-serif;text-align:center;display:flex;align-items:center;justify-content:center;height:64px">${t}</div></foreignObject>`;
+ return `<svg viewBox="0 0 600 260" width="100%"><defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="${p.c}"/></marker></defs>
+ <text x="12" y="28" fill="#00e5ff" font-family="JetBrains Mono,monospace" font-size="12" letter-spacing="2">REFERENCE PATTERN · ${p.n.toUpperCase()}</text>
+ ${box(15,a,'#3b82f6')}${box(215,b,p.c)}${box(415,c,'#4ade80')}
+ <line x1="187" y1="110" x2="212" y2="110" stroke="${p.c}" stroke-width="2.5" marker-end="url(#ar)"/><line x1="387" y1="110" x2="412" y2="110" stroke="${p.c}" stroke-width="2.5" marker-end="url(#ar)"/>
+ <rect x="215" y="185" width="370" height="50" rx="10" fill="#0f1730" stroke="#9d6bff" stroke-width="1.5" stroke-dasharray="5 4"/><text x="400" y="215" text-anchor="middle" fill="#b9c7e0" font-family="Rajdhani,Calibri,sans-serif" font-size="15">Logs → Sentinel · Policy initiative · Defender for Cloud</text>
+ <line x1="300" y1="152" x2="300" y2="183" stroke="#9d6bff" stroke-width="1.5" stroke-dasharray="4 4"/></svg>`}
+function showP(i){const p=P[i];const m=p.map;
+ $('#pdetail').innerHTML=`<div><div class="svgbox">${diag(p)}</div><div class="card" style="margin-top:14px"><h4 style="color:${p.c}">Context</h4><p>${p.ctx}</p><h4 style="color:${p.c};margin-top:10px">Configuration guidance</h4><p>${p.cfg}</p></div></div>
+ <div class="card"><h4 style="color:${p.c}">Required controls</h4><ul>${p.ctl.map(x=>`<li>${x}</li>`).join('')}</ul>
+ <h4 style="color:${p.c};margin-top:14px">Framework alignment</h4><table><tr><th>Framework</th><th>Mapping</th></tr><tr><td>Microsoft Cloud Security Benchmark</td><td class="c">${m.MCSB}</td></tr><tr><td>CIS Controls v8</td><td class="c">${m.CIS}</td></tr><tr><td>NIST SP 800-53</td><td class="c">${m.N}</td></tr><tr><td>Zero Trust pillar</td><td class="c">${m.ZT}</td></tr>${m.X?`<tr><td>AI governance</td><td class="c">${m.X}</td></tr>`:''}</table>
+ <p class="note">Owner, version and review date assigned at approval. Mappings are a draft for SNHU validation.</p></div>`}
+showP(0);
+const lc=['Propose','Draft','Review','Publish','Implement','Measure'];lc.forEach((h,i)=>{$('#lifecycle').append(el('div',{cls:'st'},`<div class="n">0${i+1}</div><h5>${h}</h5>`));if(i<5)$('#lifecycle').append(el('div',{cls:'arrow'},'➜'))});
+
+// azure
+const bh=['Assessment area','Microsoft Cloud Security Benchmark','CIS Azure Foundations','WAF security pillar','Cloud Adoption Framework'];
+const br=[['Landing zone & subscription design',[2,1,1,2]],['Azure Policy use & coverage',[2,2,1,2]],['Defender for Cloud posture',[2,2,1,1]],['Entra ID identity configuration',[2,2,2,1]],['Network controls',[2,2,2,1]],['Infrastructure deployment (manual vs IaC)',[1,1,2,2]]];
+$('#bench').innerHTML='<tr>'+bh.map(h=>`<th>${h}</th>`).join('')+'</tr>'+br.map(([a,v])=>`<tr><td style="color:var(--bright);font-weight:700">${a}</td>`+v.map(x=>x==2?'<td class="prim">Primary lens</td>':'<td class="sec">Secondary</td>').join('')+'</tr>').join('');
+const pac=[['Pull request','Bicep or Terraform change'],['Static checks','Checkov / PSRule for Azure'],['Plan review','Pattern fit + approver'],['Deploy','Pipeline identity only'],['Azure Policy','Deny · audit · modify · DINE'],['Continuous posture','Defender for Cloud + drift alerts']];
+pac.forEach(([h,d],i)=>{$('#pac').append(el('div',{cls:'st',style:'border-color:#4ade8066'},`<div class="n" style="color:var(--lime)">GATE 0${i+1}</div><h5>${h}</h5><p>${d}</p>`));if(i<5)$('#pac').append(el('div',{cls:'arrow',style:'color:var(--lime)'},'➜'))});
+const ph=[['Phase 1 · 0–30 days',[2,1,1,2]],['Phase 2 · 30–90 days',[4,3,3,4]],['Phase 3 · 90–180 days',[3,3,2,6]],['Phase 4 · 180+ days',[1,1,1,3]]];const pc=[C.cyan,C.blue,C.lime,C.mag];
+ph.forEach(([l,v])=>{const s=el('div',{cls:'stack'});v.forEach((x,i)=>s.append(el('div',{style:`height:${x*15}px;background:${pc[i]}`},x)));const col=el('div',{cls:'col'});col.append(s);col.append(el('small',{},l+`<br><b style="color:var(--bright)">${v.reduce((a,b)=>a+b)} pw</b>`));$('#stacks').append(col)});
+[['Phase 1 · Quick wins',C.cyan,'MFA gaps, legacy authentication, public endpoints, Defender plans on.'],['Phase 2 · Foundations',C.blue,'Landing-zone fixes, Policy initiatives in audit mode, Key Vault and logging baselines.'],['Phase 3 · Guardrails at scale',C.mag,'Deny-mode policies, pipeline gates, exception workflow, pattern rollout.'],['Phase 4 · Continuous posture',C.lime,'Drift detection, scorecards, quarterly benchmark refresh.']]
+.forEach(([h,c,d])=>$('#phases').append(el('div',{cls:'card phase',style:`--c:${c}`},`<h4 style="color:${c}">${h}</h4><p>${d}</p>`)));
+
+// spine
+const sh=['Control domain','NIST CSF 2.0','NIST 800-53','CIS v8','Zero Trust pillar','Higher-ed obligations'];
+const sr=[['Identity & access','PR.AA','IA · AC','5 · 6','Identity','FERPA record access · GLBA Safeguards MFA'],['Data protection','PR.DS','SC-8 · SC-28 · MP','3','Data','FERPA · GLBA encryption · PCI DSS 3–4'],['Logging & monitoring','DE.CM · DE.AE','AU · SI-4','8 · 13','Visibility & analytics','GLBA activity monitoring · PCI DSS 10'],['Network & segmentation','PR.IR','SC-7','12 · 13','Networks','PCI DSS 1 (segmentation and scope)'],['Configuration & vulnerabilities','ID.RA · PR.PS','CM-6 · CM-7 · RA-5','4 · 7','Applications & workloads','PCI DSS 2 · 6 · 11'],['Governance & risk','GV','PL · PM · CA · RA','Program level','Governance','GLBA qualified individual & risk assessment']];
+$('#spine').innerHTML='<tr>'+sh.map(h=>`<th>${h}</th>`).join('')+'</tr>'+sr.map(r=>'<tr>'+r.map((c,i)=>`<td class="${i==5?'ob':''}" ${i==0?'style="color:var(--bright);font-weight:700"':''}>${c}</td>`).join('')+'</tr>').join('');
+[['S','Spoofing',C.cyan,'Phished student or staff credentials','Phishing-resistant MFA, Conditional Access, risk policies'],['T','Tampering',C.blue,'Untracked change to infrastructure','Policy-as-code, protected pipelines, signed artifacts'],['R','Repudiation',C.pur,'Admin actions no one can trace','Immutable logs to Sentinel, PIM approval records'],['I','Information disclosure',C.mag,'Student records in a public storage account','Private endpoints, Purview labels, deny public access'],['D','Denial of service',C.amb,'Attack during registration week','Front Door WAF, DDoS Protection, autoscale'],['E','Elevation of privilege',C.lime,'Standing admin rights abused','PIM just-in-time, least privilege, break-glass alerts']]
+.forEach(([L,n,c,t,m])=>$('#stride').append(el('div',{cls:'card',style:`border-color:${c}66`},`<div class="L" style="--c:${c}">${L}</div><h4>${n}</h4><p style="clear:both;padding-top:8px"><b style="color:var(--bright)">Threat:</b> ${t}</p><p><b style="color:var(--bright)">Pattern control:</b> ${m}</p>`)));
+
+// AI layers
+const LY=[['L01','AI-aware edge security',C.cyan,'All traffic is inspected, filtered, rate-limited and classified for AI autonomy level before reaching any internal service: CDN and WAF, DDoS protection, API rate limiting, an intent classifier and an agentic firewall.'],
+ ['L02','AI security gateway (validation)',C.cyan,'Prompt-injection detection, input and output validation, cost controls, model SBOM checks and goal validation before a request reaches a model.'],
+ ['L03','Zero Trust network segmentation',C.blue,'Private subnets, service mesh with mutual TLS, and sandboxed agent execution so a compromised agent cannot move laterally.'],
+ ['L04','AI control plane & application layer',C.blue,'Policy decision points, authentication, canary releases, throttling and human-in-the-loop gates for higher-autonomy actions.'],
+ ['L05','Guardrails, DLP & behavioral boundaries',C.pur,'PII masking, toxicity filters, audit trails and detection of emergent behavior outside approved boundaries.'],
+ ['L06','Secure data & AI workloads',C.pur,'Protected relational and vector stores, model registry, disaster recovery and partitioned agent memory.'],
+ ['L07','Secrets, identity & agent credentials',C.amb,'Key management, federation, per-agent identity and short-lived capability tokens scoped to the task.'],
+ ['L08','AI-driven security & observability',C.amb,'SIEM, AI behavior monitoring, chaos testing, SOAR and telemetry that feeds back to the edge.'],
+ ['L09','AGI autonomy governance',C.mag,'Kill switch, escalation paths, confinement and self-modification gates for systems that act with increasing autonomy.'],
+ ['L10','AGI ethical containment & alignment',C.mag,'Value alignment checks, interpretability, corrigibility assurance and continuous red-teaming, with feedback to the control plane.']];
+LY.forEach(([id,n,c,d],i)=>{const r=el('div',{cls:'layer'+(i?'':' sel'),style:`--c:${c};margin-left:${i*6}px;margin-right:${i*6}px`},`<b>${id}</b><span>${n}</span>${i>7?'<em class="new">NEW</em>':''}`);r.onclick=()=>{document.querySelectorAll('.layer').forEach(x=>x.classList.remove('sel'));r.classList.add('sel');showL(i)};$('#layers').append(r)});
+function showL(i){const [id,n,c,d]=LY[i];$('#ldesc').style.borderColor=c;$('#ldesc').innerHTML=`<div class="k" style="color:${c};font-size:26px">${id}</div><h4>${n}</h4><p>${d}</p><p class="note">Compliance mapping in the repository: NIST AI RMF 1.0, EU AI Act, ISO/IEC 42001 and NIST SP 800-207.</p>`}
+showL(0);
+[['AI tutors, advisors & copilots','Each assistant is a workload with its own identity, data boundary and pattern in the library.'],['No agent ID, no production','Per-agent identity with Conditional Access and immutable audit; a rule Ken set at Humana.'],['Guardrails at the gateway','Prompt-injection hardening, PII redaction and output validation; built for Ford Credit on Amazon Bedrock.'],['One governance spine','NIST AI RMF and ISO/IEC 42001 controls mapped into the same control spine as everything else.']]
+.forEach(([h,d])=>$('#aisnhu').append(el('div',{cls:'card',style:'border-color:#ff2d9566'},`<h4 style="color:var(--mag)">${h}</h4><p>${d}</p>`)));
+const soc=[['Signal ingest','Sentinel, Defender, Purview and Entra into one workspace'],['Triage agent','Correlates, de-duplicates and scores'],['Policy gate','Blast-radius checks; humans approve tier-2+ actions'],['Action agent','Scoped runbooks with a time-boxed identity'],['Verify & learn','Confirms the fix, writes the audit ledger, tunes detections']];
+soc.forEach(([h,d],i)=>{$('#soc').append(el('div',{cls:'st'},`<div class="n">STAGE 0${i+1}</div><h5>${h}</h5><p>${d}</p>`));if(i<4)$('#soc').append(el('div',{cls:'arrow'},'➜'))});
+
+// proof
+[['Texas DPS',C.cyan,'Entra ID SSO, Conditional Access, MFA and PIM for 12,000+ identities under CJIS; ARB governance; 455 architecture documents across 15 domains.'],['Amazon',C.amb,'Architecture Review Board operations: cycle time cut 40%, 30+ architects coached, posture scoring and standards-exception dashboards.'],['GE Appliances',C.lime,'36-technology XSIAM assessment; 1,000+ posture cases to owner remediation; 17 workstreams and 570+ actions under single-owner RACI.'],['Humana',C.mag,'Security and identity standards for a 239-application migration across Azure, GCP and AWS; per-agent identity rule for AI platforms.'],['Ford Motor Company',C.blue,'GCP network landing pattern as Terraform modules; full-stack security reviews with go / no-go recommendations.'],['Higher education',C.pur,'PeopleSoft Financials, HR and Campus Solutions security for six institutions: role design, segregation of duties, student-record privacy.']]
+.forEach(([h,c,d])=>$('#cases').append(el('div',{cls:'card',style:`border-color:${c}66`},`<h4 style="color:${c}">${h}</h4><p>${d}</p>`)));
+[['Proposal deck (PPTX)','28 slides with speaker notes','attached'],['Zero Trust for AI / GI / AGI','10-layer architecture with Terraform and Python','https://github.com/kennyb7322/zt-ai-agi-security'],['Agentic Zero-Trust SOC Command Center v2','Illustrative agent-fleet SOC on Sentinel, Purview and Entra','attached HTML'],['Unified Cybersecurity Center v10','Multi-platform SOC, XDR, compliance and AGI services','attached HTML'],['Architecture Review Board platform','Intake and review workflow built for Texas DPS','https://github.com/kennyb7322/TXDPSARB'],['Okta MFA for PeopleSoft Command Center','Pattern decision, policy, test plan and cutover design','https://github.com/kennyb7322/okta-peoplesoft-mfa-command-center']]
+.forEach(([h,d,u])=>$('#exhibits').append(el('div',{cls:'card'},`<h4>${h}</h4><p>${d}</p><p style="margin-top:6px">${u.startsWith('http')?`<a href="${u}" target="_blank" rel="noopener">${u.replace('https://','')}</a>`:`<span class="tag">${u}</span>`}</p>`)));
+$('#creds').innerHTML=[['CISSP',1],['CCSP',1],['SABSA Master',1],['Microsoft SC-100',1],['Microsoft AZ-500',1],['Microsoft AZ-305',0]].map(([n,h])=>`<span class="tag" style="font-size:13px;padding:5px 12px;${h?'color:var(--lime);border-color:#4ade8088':'color:var(--dim)'}">${h?'✔':'✕'} ${n}</span>`).join('')+
+'<p style="margin-top:12px">Also held: CISM · CRISC · CEH · TOGAF 9 · SC-300 · SC-900 · AZ-900 · AWS Certified Security – Specialty · Google Professional Cloud Security Engineer · Okta Certified Professional · SailPoint IdentityIQ Engineer · PMP · PgMP · Microsoft MVP.</p>';
+</script>
+</body>
+</html>
